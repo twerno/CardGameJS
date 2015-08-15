@@ -1,0 +1,90 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{1FBAA262-C765-4CB9-B439-3F89F39B5F63}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <OutputPath>bin</OutputPath>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <TypeScriptToolsVersion>1.5</TypeScriptToolsVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+  </PropertyGroup>
+  <ItemGroup>
+    <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="src\board_and_pieces\Card.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\Counter.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\Effect.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\GameBoard.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\GameObject.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\GameObjectID.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\Player.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\Token.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\Zone.ts" />
+    <TypeScriptCompile Include="src\core\Action.ts" />
+    <TypeScriptCompile Include="src\core\ActionStack.ts" />
+    <TypeScriptCompile Include="src\core\EventManager.ts" />
+    <TypeScriptCompile Include="src\core\GameEvents.ts" />
+    <TypeScriptCompile Include="src\core\GameMgr.ts" />
+    <TypeScriptCompile Include="src\core\IDIsposable.ts" />
+    <TypeScriptCompile Include="src\utils\collections\IList.ts" />
+    <TypeScriptCompile Include="src\utils\collections\IMap.ts" />
+    <TypeScriptCompile Include="src\utils\collections\List.ts" />
+    <TypeScriptCompile Include="src\utils\collections\Map.ts" />
+    <TypeScriptCompile Include="src\utils\CommTypy.ts" />
+    <TypeScriptCompile Include="lib\MediaStream.d.ts" />
+    <TypeScriptCompile Include="lib\RTCPeerConnection.d.ts" />
+    <TypeScriptCompile Include="src\utils\WebRtc\WebRtcCommons.ts" />
+    <TypeScriptCompile Include="src\utils\WebRtc\WebRtcCommunicator.ts" />
+    <TypeScriptCompile Include="src\utils\WebRtc\WebRtcConsumer.ts" />
+    <TypeScriptCompile Include="src\utils\WebRtc\WebRtcProducer.ts" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace>CardGameJS</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets')" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <SaveServerSettingsInUserFile>True</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptRemoveComments>True</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>False</TypeScriptSourceMap>
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptModuleKind>None</TypeScriptModuleKind>
+    <TypeScriptOutFile>dist/CardGameJS.js</TypeScriptOutFile>
+    <TypeScriptOutDir>target</TypeScriptOutDir>
+    <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptMapRoot>
+    </TypeScriptMapRoot>
+    <TypeScriptSourceRoot>
+    </TypeScriptSourceRoot>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>false</TypeScriptSourceMap>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+</Project>
