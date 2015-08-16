@@ -6,40 +6,40 @@
 
 
 
-    export interface IListener {
-        (event: IEvent): void
+	export interface IEventHandler {
+        (context: GameObject, event: IEvent): Array<Action>;
     }
 
 
 
-    export interface IListenerObj {
-        eventType   : string;
-        listener    : IListener;
-        listenerCtx : Object;
+    export interface IHandlerObj {
+    	eventType  : string;
+    	handler    : IEventHandler;
+    	handlerCtx : GameObject;
     }
 
 
 
     export class EventManager {
 
-        _listeners : Collections.List<IListenerObj> = new Collections.List<IListenerObj>();
+        handlers : Collections.List<IHandlerObj> = new Collections.List<IHandlerObj>();
 
-        addEventListener(eventType: string, listenerCtx: Object, listener: IListener): void {
-            this._listeners.add(
-                {'eventType'   : eventType, 
-                 'listener'    : listener,
-                 'listenerCtx' : listenerCtx}
+        addEventListener(eventType: string, handlerCtx: GameObject, handler: IEventHandler): void {
+            this.handlers.add(
+                {'eventType'  : eventType, 
+                 'handler'    : handler,
+                 'handlerCtx' : handlerCtx}
             );
         }
 
-        removeEventListener(listenerCtx: Object, listener: IListener): void {
-            var listenerObj : IListenerObj; 
+        removeEventListener(handlerCtx: Object, handler: IEventHandler): void {
+            var listenerObj : IHandlerObj; 
 
-            for (var i: number = this._listeners.length() -1; i >= 0; i--) {
-                listenerObj = this._listeners[i];
-                if (listenerObj.listener === listener 
-                    && listenerObj.listenerCtx === listenerCtx) 
-                    this._listeners.delete(i);
+            for (var i: number = this.handlers.length() -1; i >= 0; i--) {
+                listenerObj = this.handlers[i];
+                if (listenerObj.handler === handler 
+                    && listenerObj.handlerCtx === handlerCtx) 
+                    this.handlers.delete(i);
             }
         }
     }

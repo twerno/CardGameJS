@@ -27,12 +27,11 @@
     <Content Include="tests\WebRtcProducerConsumerTest.html" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\actions\ActionsTest.ts" />
     <TypeScriptCompile Include="src\webRTC\WebRtcCommunicatorTest.ts" />
     <TypeScriptCompile Include="src\webRTC\WebRtcProducerConsumerTest.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="lib\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>
@@ -52,11 +51,11 @@
   </ProjectExtensions>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
-    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptSourceMap>False</TypeScriptSourceMap>
     <TypeScriptTarget>ES5</TypeScriptTarget>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptModuleKind>System</TypeScriptModuleKind>
+    <TypeScriptModuleKind>None</TypeScriptModuleKind>
     <TypeScriptOutFile>
     </TypeScriptOutFile>
     <TypeScriptOutDir>target</TypeScriptOutDir>
@@ -64,7 +63,8 @@
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
     <TypeScriptMapRoot>
     </TypeScriptMapRoot>
-    <TypeScriptSourceRoot>src</TypeScriptSourceRoot>
+    <TypeScriptSourceRoot>
+    </TypeScriptSourceRoot>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
@@ -72,10 +72,9 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
   <PropertyGroup>
-    <PreBuildEvent>copy "$(SolutionDir)CardGameJS\dist\CardGameJS.js" "$(ProjectDir)lib"</PreBuildEvent>
+    <PreBuildEvent>del "$(ProjectDir)lib\CardGameJS.js"</PreBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>copy "$(SolutionDir)CardGameJS\dist\CardGameJS.js" "$(ProjectDir)lib"</PostBuildEvent>
   </PropertyGroup>
 </Project>

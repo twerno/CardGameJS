@@ -36,9 +36,7 @@
     <TypeScriptCompile Include="src\HearthstoneLogic\Events\WeaponEquippedEvent.ts" />
     <TypeScriptCompile Include="src\HearthstoneSet\Paladin\Legendaries.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="lib\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>

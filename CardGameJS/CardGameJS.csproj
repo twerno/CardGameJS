@@ -31,6 +31,7 @@
     <TypeScriptCompile Include="src\board_and_pieces\Player.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Token.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Zone.ts" />
+    <TypeScriptCompile Include="src\core\ActionHelper.ts" />
     <TypeScriptCompile Include="src\core\Action.ts" />
     <TypeScriptCompile Include="src\core\ActionStack.ts" />
     <TypeScriptCompile Include="src\core\EventManager.ts" />

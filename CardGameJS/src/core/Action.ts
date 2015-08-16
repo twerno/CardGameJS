@@ -10,6 +10,8 @@ class Action implements IDisposable {
     isExecutable : (self: Action, actionChain: Array<Action>) => boolean = null;
     isLegal      : (self: Action, actionChain: Array<Action>) => boolean = null;
 
+    eventMgr : core.EventManager;
+
 
     toString(): string {
         return this.constructor['name'];
@@ -53,7 +55,7 @@ class Action implements IDisposable {
     pushMany2Post(actions:Array<Action>): void {
         var action = null;
         if (actions != null)            
-            while ((action = actions.shift()) != null) {
+            while ((action = actions.pop()) != null) {
                 this.postActions.push(action);
             }
     }
@@ -67,7 +69,7 @@ class Action implements IDisposable {
     pushMany2Pre(actions:Array<Action>): void {
         var action = null;
         if (actions != null)            
-            while ((action = actions.shift()) != null) {
+            while ((action = actions.pop()) != null) {
                 this.preActions.push(action);
             }
     }
@@ -75,20 +77,21 @@ class Action implements IDisposable {
      
 
     /**
-     *  addTrigger2Pre
+     *  addEvent2PreActions
      */ 
-    addTrigger2Pre(event: GameEvents.Event) : void {
-        this.preActions.push(new DispatchEventAction(null, event));    
+    addEvent2PreActions(event: core.IEvent) : void {
+        this.pushMany2Pre(ActionHelper.getDispatchActions(event, this.eventMgr));    
     }
 
 
 
     /**
-     *  addTrigger2Post
+     *  addEvent2PostActions
      */ 
-    addTrigger2Post(event: GameEvents.Event) : void {
-        this.preActions.push(new DispatchEventAction(null, event));    
+    addEvent2PostActions(event: core.IEvent) : void {
+        this.pushMany2Post(ActionHelper.getDispatchActions(event, this.eventMgr));    
     }
+
 
 
     /**
@@ -116,56 +119,35 @@ class Action implements IDisposable {
     }
 
 }
+    
 
 
 
-/**
+/*
  *  DispatchEventAction
- */
+ */ 
 class DispatchEventAction extends Action {
+	
+	event      : core.IEvent;
+	handlerObj : core.IHandlerObj;
 
-    globalEventBus : any;
-    event: GameEvents.Event;
 
 
-    /**
-     *  constructor
-     */ 
-    constructor(globalEventBus: any, event: GameEvents.Event) {
-        super();
+	constructor(event: core.IEvent, handlerObj: core.IHandlerObj) {
+		super();
+		
+		this.event      = event;
+		this.handlerObj = handlerObj;
 
-        this.globalEventBus = globalEventBus;
-        this.event = event;
 
-        this.preActions  = null;
-        this.postActions = null;
+        this.pushMany2Post(handlerObj.handler(handlerObj.handlerCtx, event));	
+	}
 
-        this.runAction = function(self: DispatchEventAction, actionChain: Array<Action>): void {
-            // for each (handler in globalEventBus.handlers) {
-            //     if (handler.eventType === event.eventType) {
-            //         this.postActions.add(handler.getAsAction(event));
-            //     }
-            // }
-        }
-    }
+
 
     toString(): string {
         return super.toString() +' (' +this.event.eventType +')';
     }
-
-
-
-    /**
-     *  destructor
-     */ 
-    dispose() {
-        this.globalEventBus = null;
-        this.event.dispose();
-        this.event          = null;
-
-        super.dispose();
-    }
-
 }
 
 
