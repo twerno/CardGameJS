@@ -107,40 +107,53 @@ eventMgr.addEventListener(BeerFoundEvent.EVENT_TYPE, null,
 
 var stack : ActionStack = new ActionStack();
 stack.onActionSuccess.add(
-    function (action: Action, actionChain: Array<Action>): void {
+    function (stack: ActionStack, action: Action, actionChain: Array<Action>): void {
         console.log('onActionSuccess - ' +action.toString(), actionChain);
         document.writeln('<div class="row">');
-        document.writeln('<div class="col-md-4">');
-        
-        document.write('onActionSuccess - ' +action.toString() +"; [" +actionChain +"]<br>");
+        document.writeln('<div class="col-xs-2">onActionSuccess (#'+ stack.id+')</div>');
+        document.writeln('<div class="col-xs-3">' +action +'</div>');
+        document.writeln('<div class="col-xs-4">[' +actionChain +']</div>');
         document.writeln('</div>');
     });
 
 stack.onBeforeAction.add(
-    function (action: Action, actionChain: Array<Action>): void {
+    function (stack: ActionStack, action: Action, actionChain: Array<Action>): void {
         console.log('onBeforeAction - ' + action.toString(), actionChain);
-        //document.write('onBeforeAction - ' +action.toString() +"; [" +actionChain +"]<br>");
+        //document.writeln('<div class="row">');
+        //document.writeln('<div class="col-xs-2">onBeforeAction</div>');
+        //document.writeln('<div class="col-xs-3">' +action +'</div>');
+        //document.writeln('<div class="col-xs-4">[' +actionChain +']</div>');
+        //document.writeln('</div>');
     });
 
 stack.onError.add(
-        function (err: Error, action: Action, actionChain: Array<Action>): void {
-        console.log('onBeforeAction - ' + action.toString() +'\n' +err, actionChain, err);
+        function (stack: ActionStack, action: Action, actionChain: Array<Action>, err: Error): void {
+        console.log('onError - ' + action.toString() +'\n' +err, actionChain, err);
         document.writeln('<div class="row">');
-        document.write('onBeforeAction - ' + action.toString() +'\n' +err +"<br>");
+        document.writeln('<div class="col-xs-2">onError (#'+ stack.id+')</div>');
+        document.writeln('<div class="col-xs-3">' +action +'</div>');
+        document.writeln('<div class="col-xs-4 error">' +err +'</div>');
         document.writeln('</div>');
     });
 
 stack.onStackComplete = 
-    function(stack:ActionStack):void {
+    function(stack: ActionStack):void {
         console.log('onStackComplete');
         document.writeln('<div class="row">');
-        document.write('onStackComplete - ' + stack.chain +"<br>");
+        document.writeln('<div class="col-xs-2">onStackComplete (#'+ stack.id+') </div>');
+        document.writeln('</div>');
     };
 
 stack.onPutActionOnStack =
-    function(action: Action): void {
-        //document.write('<b>[' +action +']</b> ' + 'pre: ' +action.preActions +'; post: ' +action.postActions +"<br>");
+    function(stack: ActionStack, action: Action): void {
+        document.writeln('<div class="row">');
+        document.writeln('<div class="col-xs-2">onPutActionOnStack (#'+ stack.id+') </div>');
+        document.writeln('<div class="col-xs-3">' +action +'</div>');
+        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
+        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
+        document.writeln('</div>');
     }
 
+document.writeln('<div class="container-fluid">')
 stack.putOnStack(new BuyABeerAction());
 stack.run();

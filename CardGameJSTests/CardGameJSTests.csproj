@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="tests\StackTest.html" />
+    <Content Include="tests\style.css" />
     <Content Include="tests\WebRtcCommunicatorTest.html" />
     <Content Include="tests\WebRtcProducerConsumerTest.html" />
   </ItemGroup>

@@ -1,14 +1,18 @@
 ﻿
-interface IStackError { (error: Error, action: Action, actionChain: Array<Action>): void; }
+interface IStackError { (stack: ActionStack, action: Action, actionChain: Array<Action>, error: Error): void; }
 
-interface IStackAction { (action: Action): void; }
+interface IStackAction { (stack: ActionStack, action: Action): void; }
 
-interface IStackOnAction { (action: Action, actionChain: Array<Action>): void; }
+interface IStackOnAction { (stack: ActionStack, action: Action, actionChain: Array<Action>): void; }
 
 interface IStackComplete { (stack: ActionStack): void; }
 
 
 class ActionStack {
+
+    numerator : number = 0;
+
+    id : string = this.numerator.toString();
 
     private isCompleted : boolean = true;
 
@@ -16,19 +20,25 @@ class ActionStack {
 
     chain : Array<Action> = [];
     
-    parentStack : ActionStack = null;
+    parent : ActionStack = null;
     
-    private rootStack : ActionStack = this; 
+    private root : ActionStack = this; 
     
+    stackChain : Array<ActionStack> = [];
+
+
+
     onError : Collections.List<IStackError> = new Collections.List<IStackError>();
 
     onActionSuccess : Collections.List<IStackOnAction> = new Collections.List<IStackOnAction>();
 
-    onStackComplete : IStackComplete = null; // Collections.List<IStackComplete> = new Collections.List<IStackComplete>();
+    onStackComplete : IStackComplete = null;
+
+    private internalOnStackComplete : IStackComplete = null;
 
     onBeforeAction : Collections.List<IStackOnAction> = new Collections.List<IStackOnAction>();
 
-    onPutActionOnStack : IStackAction = null; 
+    onPutActionOnStack : IStackAction = null;
 
 
     /*
@@ -37,7 +47,7 @@ class ActionStack {
     putOnStack(action:Action): void {
         this.stack.push(action);
         this.isCompleted = false;
-        this.rootStack.onPutActionOnStack === null || this.rootStack.onPutActionOnStack(action);
+        this.root.onPutActionOnStack === null || this.root.onPutActionOnStack(this, action);
     }
 
 
@@ -50,13 +60,15 @@ class ActionStack {
 
         if (currentAction != null) {
             if (currentAction.isComplex()) {
-                var nestedStack : ActionStack = this.buildNestedStack(currentAction);            
+                var nestedStack : ActionStack = this.buildNestedStack(currentAction);
+                this.root.stackChain.push(nestedStack);            
                 nestedStack.run();
             } else 
                 this.runAction(currentAction);
-        } else if (!this.isCompleted && this.onStackComplete === null) {
+        } else if (!this.isCompleted && this.root.onStackComplete != null) {
             this.isCompleted = true;
-            this.onStackComplete(this);
+            this.root.onStackComplete === null || this.root.onStackComplete(this);
+            this.internalOnStackComplete === null || this.internalOnStackComplete(this);
         }
     }
 
@@ -70,21 +82,21 @@ class ActionStack {
             var _chain : Array<Action> = this.chain[this.chain.length -1] === action ? this.chain.slice(0, -1) : this.chain;
 
             if (this.onBeforeAction != null)
-                for (var i = 0; i < this.rootStack.onBeforeAction.length(); i++)
-                    this.rootStack.onBeforeAction.get(i)(action, _chain);
+                for (var i = 0; i < this.root.onBeforeAction.length(); i++)
+                    this.root.onBeforeAction.get(i)(this, action, _chain);
 
             //action.runAction === null || action.runAction(action, this.chain);
             this.runAction2(action, _chain);
                               
             if (this.onActionSuccess != null)
-                for (var i = 0; i < this.rootStack.onActionSuccess.length(); i++)
-                    this.rootStack.onActionSuccess.get(i)(action, _chain);
+                for (var i = 0; i < this.root.onActionSuccess.length(); i++)
+                    this.root.onActionSuccess.get(i)(this, action, _chain);
 
             this.run();      
         } catch (err) {
             if (this.onError != null)
-                for (var i = 0; i < this.rootStack.onError.length(); i++)
-                    this.rootStack.onError.get(i)(err, action, _chain);
+                for (var i = 0; i < this.root.onError.length(); i++)
+                    this.root.onError.get(i)(this, action, _chain, err);
         }
     }
 
@@ -108,14 +120,16 @@ class ActionStack {
      */ 
     private buildNestedStack(action: Action): ActionStack {
         var nestedStack : ActionStack = new ActionStack();
-        nestedStack.parentStack = this;
-        nestedStack.rootStack   = this.rootStack;
+        nestedStack.parent = this;
+        nestedStack.root   = this.root;
         nestedStack.chain       = this.chain.slice(0);
         nestedStack.chain.push(action);
+        nestedStack.id = (++this.root.numerator).toString();
 
-        nestedStack.onStackComplete = 
+        nestedStack.internalOnStackComplete = 
             function(stack: ActionStack): void {
-                stack.parentStack.run();
+                stack.root.stackChain.pop();
+                stack.parent.run();
             }
 
         this.fillStack(nestedStack, action.preActions);
