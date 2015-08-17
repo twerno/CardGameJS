@@ -1,4 +1,5 @@
-﻿///<reference path="../Utils/Collections/List.ts"/>
+///<reference path="../Utils/Collections/List.ts"/>
+///<reference path='GameObjectID.ts' />
 
 class Counter extends GameObjectID {
 

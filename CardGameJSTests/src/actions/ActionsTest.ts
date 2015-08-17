@@ -1,5 +1,5 @@
-﻿///<reference path="../../../CardGameJS/dist/CardGameJS.d.ts"/>
-
+///<reference path="../../../CardGameJS/dist/CardGameJS.d.ts"/>
+ 
 class Beer {};
 
 var eventMgr : core.EventManager = new core.EventManager();

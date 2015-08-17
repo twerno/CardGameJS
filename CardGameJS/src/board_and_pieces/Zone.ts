@@ -1,4 +1,6 @@
-﻿class Zone extends GameObject {
+///<reference path='GameObjectID.ts' />
+
+class Zone extends GameObject {
 
     private _list: Collections.List<Card> = new Collections.List<Card>();
 

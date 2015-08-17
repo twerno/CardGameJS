@@ -1,3 +1,5 @@
+///<reference path='GameObject.ts' />
+	
 class Player extends GameObject {
 
     name: string;

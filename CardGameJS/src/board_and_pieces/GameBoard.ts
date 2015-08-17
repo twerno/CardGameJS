@@ -1,4 +1,5 @@
-﻿///<reference path="../Utils/CommTypy.ts"/>
+///<reference path='GameObjectID.ts' />
+///<reference path="../Utils/CommTypy.ts"/>
 ///<reference path="../Utils/Collections/Map.ts"/>
 ///<reference path="../Utils/Collections/List.ts"/>
 

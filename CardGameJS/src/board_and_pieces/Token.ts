@@ -1,4 +1,6 @@
-﻿class Token extends GameObjectID {
+﻿///<reference path='GameObjectID.ts' />
+	
+class Token extends GameObjectID {
     tokenType: string;
 
     constructor(tokenType: string) {

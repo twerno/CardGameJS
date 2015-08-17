@@ -1,7 +1,9 @@
 ///<reference path="../../../lib/RTCPeerConnection.d.ts"/>
+///<reference path="../CommTypy.ts"/>
 ///<reference path="WebRtcCommons.ts"/>
 ///<reference path="WebRtcProducer.ts"/>
 ///<reference path="WebRtcConsumer.ts"/>
+
 	
 "use strict";
 
