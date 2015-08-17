@@ -1,4 +1,6 @@
+
 CardGameJS/dist/**
+CardGameJS/src/**.js
 
 CardGameJSTests/dist/**
 CardGameJSTests/lib/**
@@ -7,6 +9,9 @@ CardGameJSTests/target/**
 HSCardGameJS/dist/**
 HSCardGameJS/lib/**
 HSCardGameJS/target/**
+
+*.js
+*.map
 
 
 
