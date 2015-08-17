@@ -1,148 +1,184 @@
-﻿///<reference path="../Utils/Collections/List.ts"/>
+///<reference path="../Utils/Collections/List.ts"/>
 ///<reference path="../core/GameEvents.ts"/>
 
-class Action implements IDisposable {
-    
-    preActions  : Array<Action> = [];
-    postActions : Array<Action> = [];
 
-    runAction    : (self: Action, actionChain: Array<Action>) => void    = null;
-    isExecutable : (self: Action, actionChain: Array<Action>) => boolean = null;
-    isLegal      : (self: Action, actionChain: Array<Action>) => boolean = null;
+/*
+ *  IAction
+ */
+interface IAction {
+	
+	getNextAction(): IAction;
+	
+	isComplex(): boolean;
+	
+	isExecutable(): boolean;
+	
+	isEmpty(): boolean;
+	
+	executeAction(): void;
+	
+	parent: IAction;
 
-    eventMgr : core.EventManager;
-
-
-    toString(): string {
-        return this.constructor['name'];
-    }
-
-
-    /**
-     *  destructor
-     */ 
-    dispose() {
-
-        if (this.preActions != null) {
-            this.preActions.forEach(
-                function(action: Action) {
-                    action.dispose();
-                });
-            this.preActions = [];
-            this.preActions = null;
-        }
-
-        if (this.postActions != null) {
-            this.postActions.forEach(
-                function(action: Action) {
-                    action.dispose();
-                });
-            this.postActions = [];
-            this.postActions = null;
-        }
-
-        this.runAction    = null;
-        this.isExecutable = null;
-        this.isLegal      = null;
-    }
-
-
-
-
-    /**
-     *  pushMany2Post
-     */ 
-    pushMany2Post(actions:Array<Action>): void {
-        var action = null;
-        if (actions != null)            
-            while ((action = actions.pop()) != null) {
-                this.postActions.push(action);
-            }
-    }
-
-
-
-
-    /**
-     *  pushMany2Pre
-     */ 
-    pushMany2Pre(actions:Array<Action>): void {
-        var action = null;
-        if (actions != null)            
-            while ((action = actions.pop()) != null) {
-                this.preActions.push(action);
-            }
-    }
-
-     
-
-    /**
-     *  addEvent2PreActions
-     */ 
-    addEvent2PreActions(event: core.IEvent) : void {
-        this.pushMany2Pre(ActionHelper.getDispatchActions(event, this.eventMgr));    
-    }
-
-
-
-    /**
-     *  addEvent2PostActions
-     */ 
-    addEvent2PostActions(event: core.IEvent) : void {
-        this.pushMany2Post(ActionHelper.getDispatchActions(event, this.eventMgr));    
-    }
-
-
-
-    /**
-     *  isEmpty
-     */ 
-    isEmpty() : boolean {
-        return this.actionCount() === 0;
-    }
-
-
-
-    /**
-     *  isComplex
-     */ 
-    isComplex() : boolean {
-        return this.actionCount() > 1;
-    }
-
-
-
-    actionCount(): number {
-        return (this.preActions === null ? 0 : this.preActions.length) 
-               + (this.postActions === null ? 0 : this.postActions.length)
-               + (this.runAction === null ? 0 : 1);
-    }
-
+    getChain(): Array<IAction>;
 }
-    
 
 
 
 /*
+ *  SimpleAction
+ */	
+class SimpleAction implements IAction {
+	
+	parent: IAction = null;
+	
+	runAction: (self: IAction) => void = null;
+	
+	constructor (parent: IAction) {
+		this.parent = parent;
+	}
+	
+	getNextAction(): IAction {
+		return null;
+	}
+	
+	isComplex(): boolean {
+		return false;
+	}
+	
+	isExecutable(): boolean {
+		return true;
+	}
+	
+	isEmpty(): boolean {
+		return this.runAction === null;	
+	}
+	
+	executeAction(): void {
+		this.runAction === null || this.runAction(this);	
+	};
+	
+    toString(): string {
+        return this.constructor['name'];
+    }
+
+    getChain(): Array<IAction> {
+    	if (this.parent === null)
+    		return [this];
+    	else {
+    		var result : Array<IAction> = this.parent.getChain();
+    		result.push(this);
+    		return result;
+    	}
+    }
+}
+
+
+
+
+
+/**
+ *  AtomicAction
+ */
+class AtomicAction extends SimpleAction {
+	
+	private optionalName: string = '';
+	
+	constructor (parent: IAction, 
+	             runAction: (self: IAction) => void, 
+		         optionalName: string = '') {
+		super(parent);
+		this.runAction = runAction;
+		this.optionalName = optionalName;
+	}
+	
+    toString(): string {
+        return (this.optionalName === '') ? this.constructor['name'] : this.optionalName;
+    }
+}
+
+
+
+
+
+/*
+ *  ComplexAction
+ */	
+class Actions implements IAction {
+	
+	parent: IAction = null;
+	
+	actionsFIFO : Array<IAction> = [];
+	
+	constructor(parent: IAction) {
+		this.parent = parent;
+	}
+	
+	getNextAction(): IAction {
+		return this.actionsFIFO.shift() || null;
+	}
+	
+	isComplex(): boolean {
+		return true;
+	}
+	
+	isExecutable(): boolean {
+		return false;
+	}
+	
+	isEmpty(): boolean {
+		return this.actionsFIFO.length === 0;	
+	}
+	
+	executeAction(): void {
+		throw new Error('not executable'); 
+	};		
+	
+    toString(): string {
+        return this.constructor['name'];
+    }
+
+    getChain(): Array<IAction> {
+    	if (this.parent === null)
+    		return [this];
+    	else {
+    		var result : Array<IAction> = this.parent.getChain();
+    		result.push(this);
+    		return result;
+    	}
+    }
+
+    pushMany(actions: Array<IAction>): void {
+        if (actions != null)
+            for (var i = 0; i < actions.length; i++) {
+                this.actionsFIFO.push(actions[i]);
+            }
+    }
+}
+
+
+/**
  *  DispatchEventAction
  */ 
-class DispatchEventAction extends Action {
+class DispatchEventAction extends Actions {
 	
-	event      : core.IEvent;
-	handlerObj : core.IHandlerObj;
+	event    : core.IEvent;
+	eventMgr : core.EventManager;
 
 
-
-	constructor(event: core.IEvent, handlerObj: core.IHandlerObj) {
-		super();
+	constructor(parent: IAction, event: core.IEvent, eventMgr: core.EventManager) {
+		super(parent);
 		
-		this.event      = event;
-		this.handlerObj = handlerObj;
+		this.event    = event;
+		this.eventMgr = eventMgr;
 
-
-        this.pushMany2Post(handlerObj.handler(handlerObj.handlerCtx, event));	
+        var handlerObj : core.IHandlerObj;
+    	for (var handlerIdx in eventMgr.handlers._list) {
+            handlerObj = eventMgr.handlers._list[handlerIdx];
+    		if (handlerObj.eventType === event.eventType) {
+                this.actionsFIFO.push(new EventAction(event, handlerObj));
+    		}
+    	}	
 	}
-
 
 
     toString(): string {
@@ -151,97 +187,26 @@ class DispatchEventAction extends Action {
 }
 
 
-
 /**
- *  RegisterEventListener
+ *  EventAction
  */
-class RegisterEventListener extends Action {
+class EventAction extends Actions {
 
-    globalEventBus : any;
-    eventType      : string;
-    card           : Card;
-    handler        : GameEvents.IEventHandler;
+	event      : core.IEvent;
+	handlerObj : core.IHandlerObj;
 
+    constructor(event: core.IEvent, handlerObj: core.IHandlerObj) {
+        super(null);
 
+        this.event      = event;
+        this.handlerObj = handlerObj;
 
-    /**
-     *  constructor
-     */ 
-    constructor(globalEventBus: any, card: Card, eventType: string, handler: GameEvents.IEventHandler) {
-        super();
-
-        this.globalEventBus = globalEventBus;
-        this.eventType      = eventType;
-        this.card           = card;
-        this.handler        = handler;
-
-
-        this.preActions  = null;
-        this.postActions = null;
-
-        this.runAction = function(self: RegisterEventListener, actionChain: Array<Action>): void {
-            //globalEventBus.registerListener(eventType: string, object: Card, handler: 
-        }
+        this.pushMany(handlerObj.handler(handlerObj.handlerCtx, event));
     }
 
 
 
-    /**
-     *  destructor
-     */ 
-    dispose() {
-        this.globalEventBus = null;
-        this.eventType      = null;
-        this.card           = null;
-        this.handler        = null;
-
-        super.dispose();
-    }
-
-} 
-
-
-
-/**
- *  SetCounterValueAction
- */
-class SetCounterValueAction extends Action {
-
-    counter       : Counter;
-    computeNewVal : (self: SetCounterValueAction, actionChain: Array<Action>) => number = null;
-
-
-
-    /**
-     *  constructor
-     */ 
-    constructor(counter: Counter, computeFn: (self: SetCounterValueAction, actionChain: Array<Action>) => number) {
-        super();
-
-        this.counter       = counter;
-        this.computeNewVal = computeFn;
-
-        this.preActions  = null;
-        this.postActions = null;
-
-        this.isExecutable = function(self: SetCounterValueAction, actionChain: Array<Action>): boolean {
-            return self.computeNewVal != null && self.counter != null;
-        }
-
-        this.runAction = function(self: SetCounterValueAction, actionChain: Array<Action>): void {
-            counter.value = self.computeNewVal(self, actionChain);    
-        }
-    }
-
-
-
-    /**
-     *  destructor
-     */ 
-    dispose() {
-        this.counter       = null;
-        this.computeNewVal = null;
-
-        super.dispose();
+    toString(): string {
+        return super.toString() +' (' +this.event.eventType +')';
     }
 }

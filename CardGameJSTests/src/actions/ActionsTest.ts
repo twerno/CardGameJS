@@ -5,49 +5,41 @@ class Beer {};
 var eventMgr : core.EventManager = new core.EventManager();
 
 
-class BuyABeerAction extends Action {
+class BuyABeerAction extends Actions {
+	
+    constructor(parent: IAction) {
+    	super(parent);
 
-    constructor() {
-        super();
-
-        this.preActions.push(new GoToALocalShopAction());
-        this.postActions.push(new GoHomeAction());
-
-        this.runAction = function(self: BuyABeerAction, actionChain: Array<Action>): void {
-            // do something
-        }
+    	this.actionsFIFO.push(new GoToALocalShopAction(this));
+        this.pushMany([new LookForABeerAction(this, new BeerFoundEvent(new Beer()))]);
+    	
+    	this.actionsFIFO.push(
+    		new AtomicAction(this,
+    			function(self: BuyABeerAction): void {
+            		// do something
+        	    }, 'optionalName'));
+    	
+    	this.actionsFIFO.push(new GoHomeAction(this));
     }                                                                                                   
 }
 
 
-class GoToALocalShopAction extends Action {
-    constructor() {
-        super();
+class GoToALocalShopAction extends Actions {
 
-        this.postActions.push(new LookForABeerAction());
-
-        this.runAction = function(self: BuyABeerAction, actionChain: Array<Action>): void {
-            // do something
-        }
+    constructor(parent: IAction) {
+        super(parent);
     }
 }
 
 // empty action
-class GoHomeAction extends Action {
+class GoHomeAction extends SimpleAction {
 }
 
 // dispatch an event action
-class LookForABeerAction extends Action {
-    constructor() {
-        super();
+class LookForABeerAction extends DispatchEventAction {
 
-        this.eventMgr = eventMgr;
-
-        this.addEvent2PostActions(new BeerFoundEvent(new Beer()));
-
-        this.runAction = function(self: BuyABeerAction, actionChain: Array<Action>): void {
-            // do something
-        }
+    constructor(parent: IAction, event: core.IEvent) {
+        super(parent, event, eventMgr);
     }
 }
 
@@ -68,57 +60,49 @@ class BeerFoundEvent implements core.IEvent {
 
 
 // onBeerFoundEvent
-class TakeBeerAction extends Action {
+class TakeBeerAction extends Actions {
 
     beer : Beer;
 
-    constructor(beer: Beer) {
-        super();
+    constructor(parent: IAction, beer: Beer) {
+        super(parent);
 
         this.beer = beer;
 
-        this.runAction = function(self: BuyABeerAction, actionChain: Array<Action>): void {
-            // do something
-        }
-
-        this.pushMany2Post([new PayForABeerAction(beer)]);
+        this.pushMany([new PayForABeerAction(this, beer)]);
     }
 }
 
-class PayForABeerAction extends Action {
-    beer : Beer
+class PayForABeerAction extends Actions {
+    beer : Beer;
 
-    constructor(beer: Beer) {
-        super();
+    constructor(parent: IAction, beer: Beer) {
+        super(parent);
 
         this.beer = beer;
-
-        this.runAction = function(self: BuyABeerAction, actionChain: Array<Action>): void {
-            // do something
-        }
     }
 }
 
 
 eventMgr.addEventListener(BeerFoundEvent.EVENT_TYPE, null, 
-    function(context: GameObject, event: BeerFoundEvent): Array<Action> {
-        return [new TakeBeerAction(event.beer)];
+    function(context: GameObject, event: BeerFoundEvent): Array<IAction> {
+        return [new TakeBeerAction(null, event.beer)];
     });
 
 var stack : ActionStack = new ActionStack();
 stack.onActionSuccess.add(
-    function (stack: ActionStack, action: Action, actionChain: Array<Action>): void {
-        console.log('onActionSuccess - ' +action.toString(), actionChain);
+    function (stack: ActionStack, action: IAction): void {
+        console.log('onActionSuccess - ' +action.toString());
         document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onActionSuccess (#'+ stack.id+')</div>');
+        document.writeln('<div class="col-xs-2">onActionSuccess</div>');
         document.writeln('<div class="col-xs-3">' +action +'</div>');
-        document.writeln('<div class="col-xs-4">[' +actionChain +']</div>');
+        document.writeln('<div class="col-xs-4">[' +stack._stackFIFO +']</div>');
         document.writeln('</div>');
     });
 
 stack.onBeforeAction.add(
-    function (stack: ActionStack, action: Action, actionChain: Array<Action>): void {
-        console.log('onBeforeAction - ' + action.toString(), actionChain);
+    function (stack: ActionStack, action: IAction): void {
+        console.log('onBeforeAction - ' + action.toString(), stack._stackFIFO);
         //document.writeln('<div class="row">');
         //document.writeln('<div class="col-xs-2">onBeforeAction</div>');
         //document.writeln('<div class="col-xs-3">' +action +'</div>');
@@ -127,10 +111,10 @@ stack.onBeforeAction.add(
     });
 
 stack.onError.add(
-        function (stack: ActionStack, action: Action, actionChain: Array<Action>, err: Error): void {
-        console.log('onError - ' + action.toString() +'\n' +err, actionChain, err);
+        function (stack: ActionStack, action: IAction, err: Error): void {
+        console.log('onError - ' + action.toString() +'\n' +err, action.getChain(), err);
         document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onError (#'+ stack.id+')</div>');
+        document.writeln('<div class="col-xs-2">onError</div>');
         document.writeln('<div class="col-xs-3">' +action +'</div>');
         document.writeln('<div class="col-xs-4 error">' +err +'</div>');
         document.writeln('</div>');
@@ -140,20 +124,20 @@ stack.onStackComplete =
     function(stack: ActionStack):void {
         console.log('onStackComplete');
         document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onStackComplete (#'+ stack.id+') </div>');
+        document.writeln('<div class="col-xs-2">onStackComplete</div>');
         document.writeln('</div>');
     };
 
 stack.onPutActionOnStack =
-    function(stack: ActionStack, action: Action): void {
+    function(stack: ActionStack, action: IAction): void {
         document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onPutActionOnStack (#'+ stack.id+') </div>');
+        document.writeln('<div class="col-xs-2">onPutActionOnStack</div>');
         document.writeln('<div class="col-xs-3">' +action +'</div>');
-        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
-        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
+//        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
+//        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
         document.writeln('</div>');
     }
 
 document.writeln('<div class="container-fluid">')
-stack.putOnStack(new BuyABeerAction());
+stack.putOnStack(new BuyABeerAction(null));
 stack.run();

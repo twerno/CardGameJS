@@ -25,7 +25,7 @@ module GameEvents {
     }
 
     export interface IEventHandler {
-        (self: GameObject, eventType: string, actionChain: Collections.List<Action>): Array<Action>;
+        (self: GameObject, eventType: string, actionChain: Collections.List<IAction>): Array<IAction>;
     }
 
     export interface IOnSucces {

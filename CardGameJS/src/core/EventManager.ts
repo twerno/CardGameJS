@@ -1,4 +1,6 @@
-﻿module core {
+﻿///<reference path="Action.ts"/>	
+
+module core {
 
     export interface IEvent {
         eventType: string;
@@ -7,7 +9,7 @@
 
 
 	export interface IEventHandler {
-        (context: GameObject, event: IEvent): Array<Action>;
+        (context: GameObject, event: IEvent): Array<IAction>;
     }
 
 
