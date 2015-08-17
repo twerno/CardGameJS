@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<project default="CardGameJSTest">
+    <target name="CardGameJSTest">
+    	<copy file="../CardGameJS/dist/CardGameJS.js" todir="lib"/> 
+    </target>
+</project>
