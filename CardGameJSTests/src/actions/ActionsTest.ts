@@ -33,7 +33,11 @@ class GoToALocalShopAction extends Actions {
 
 // empty action
 class GoHomeAction extends SimpleAction {
-}
+
+    toString():string {
+        return super.toString();
+    }
+}       
 
 // dispatch an event action
 class LookForABeerAction extends DispatchEventAction {
@@ -83,6 +87,15 @@ class PayForABeerAction extends Actions {
     }
 }
 
+function documentWrite(html: string): void {
+    var wrap = document.createElement('div');
+	var frag = document.createDocumentFragment();
+	wrap.innerHTML = html;
+	while (wrap.firstChild) {
+		document.getElementById('log').appendChild(wrap.firstChild);
+	}
+}
+
 
 eventMgr.addEventListener(BeerFoundEvent.EVENT_TYPE, null, 
     function(context: GameObject, event: BeerFoundEvent): Array<IAction> {
@@ -93,11 +106,11 @@ var stack : ActionStack = new ActionStack();
 stack.onActionSuccess.add(
     function (stack: ActionStack, action: IAction): void {
         console.log('onActionSuccess - ' +action.toString());
-        document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onActionSuccess</div>');
-        document.writeln('<div class="col-xs-3">' +action +'</div>');
-        document.writeln('<div class="col-xs-4">[' +stack._stackFIFO +']</div>');
-        document.writeln('</div>');
+        documentWrite('<div class="row">'
+                        +'<div class="col-xs-2">onActionSuccess</div>'
+                        +'<div class="col-xs-3">' +action +'</div>'
+                        +'<div class="col-xs-4">[' +stack._stackFIFO +']</div>'
+                        +'</div>');
     });
 
 stack.onBeforeAction.add(
@@ -113,31 +126,31 @@ stack.onBeforeAction.add(
 stack.onError.add(
         function (stack: ActionStack, action: IAction, err: Error): void {
         console.log('onError - ' + action.toString() +'\n' +err, action.getChain(), err);
-        document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onError</div>');
-        document.writeln('<div class="col-xs-3">' +action +'</div>');
-        document.writeln('<div class="col-xs-4 error">' +err +'</div>');
-        document.writeln('</div>');
+        documentWrite('<div class="row">'
+                        +'<div class="col-xs-2">onError</div>'
+                        +'<div class="col-xs-3">' +action +'</div>'
+                        +'<div class="col-xs-4 error">' +err +'</div>'
+                        +'</div>');
     });
 
 stack.onStackComplete = 
     function(stack: ActionStack):void {
         console.log('onStackComplete');
-        document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onStackComplete</div>');
-        document.writeln('</div>');
+        documentWrite('<div class="row">'
+                        +'<div class="col-xs-2">onStackComplete</div>'
+                        +'</div>');
     };
 
 stack.onPutActionOnStack =
     function(stack: ActionStack, action: IAction): void {
-        document.writeln('<div class="row">');
-        document.writeln('<div class="col-xs-2">onPutActionOnStack</div>');
-        document.writeln('<div class="col-xs-3">' +action +'</div>');
+        documentWrite('<div class="row">'
+                        +'<div class="col-xs-2">onPutActionOnStack</div>'
+                        +'<div class="col-xs-3">' +action +'</div>'
 //        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
 //        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
-        document.writeln('</div>');
+                        +'</div>');
     }
 
-document.writeln('<div class="container-fluid">')
+document.writeln('<div id="log" class="container-fluid">')
 stack.putOnStack(new BuyABeerAction(null));
 stack.run();

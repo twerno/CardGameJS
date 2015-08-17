@@ -47,10 +47,12 @@ class ActionStack {
     	if (this._stackFIFO.length != 0) {
     		var action: IAction = this._stackFIFO[0];
 			
-            action.isEmpty() && this.runAction(action); // log & remove 
-			action.isComplex() && this.runComplexAction(action);
-			!action.isComplex() && this.runAction(action);
-
+            if (action.isEmpty())
+                this.runAction(action); // log & remove 
+            else {
+			    action.isComplex() && this.runComplexAction(action);
+			    !action.isComplex() && this.runAction(action);
+            }
     	} else { 
     		this.onStackComplete != null && !this.isCompleted && this.onStackComplete(this);
             this.isCompleted = true;
@@ -65,7 +67,7 @@ class ActionStack {
             this._stackFIFO.unshift(action);
             this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
         }
-		this.run();	    	
+		this.callRunAsync();	    	
     }
 
 
@@ -89,6 +91,16 @@ class ActionStack {
                 for (var i = 0; i < this.onError.length(); i++)
                     this.onError.get(i)(this, action, err);
         }	    		
-		this.run();
+		this.callRunAsync();
+    }
+
+    private callRunAsync(): void {
+        //this.run();
+        var self: ActionStack = this;
+
+        setTimeout(
+            function callRun():void {
+                self.run();
+            }, 1);
     }
 }
