@@ -1,4 +1,4 @@
-///<reference path='GameObjectID.ts' />
+///<reference path='GameObject.ts' />
 
 class Zone extends GameObject {
 
