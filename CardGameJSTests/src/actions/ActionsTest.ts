@@ -109,13 +109,13 @@ stack.onActionSuccess.add(
         documentWrite('<div class="row">'
                         +'<div class="col-xs-2">onActionSuccess</div>'
                         +'<div class="col-xs-3">' +action +'</div>'
-                        +'<div class="col-xs-4">[' +stack._stackFIFO +']</div>'
+                        +'<div class="col-xs-4">[' +stack._stackFILO +']</div>'
                         +'</div>');
     });
 
 stack.onBeforeAction.add(
     function (stack: ActionStack, action: IAction): void {
-        console.log('onBeforeAction - ' + action.toString(), stack._stackFIFO);
+        console.log('onBeforeAction - ' + action.toString(), stack._stackFILO);
         //document.writeln('<div class="row">');
         //document.writeln('<div class="col-xs-2">onBeforeAction</div>');
         //document.writeln('<div class="col-xs-3">' +action +'</div>');

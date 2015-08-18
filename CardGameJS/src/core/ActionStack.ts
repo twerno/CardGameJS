@@ -1,4 +1,4 @@
-﻿///<reference path="../Utils/Collections/List.ts"/>
+///<reference path="../Utils/Collections/List.ts"/>
 ///<reference path="../core/GameEvents.ts"/>
 ///<reference path="Action.ts"/>	
 
@@ -28,7 +28,7 @@ class ActionStack {
     
 
 	private isCompleted: boolean = false;
-	_stackFIFO : Array<IAction> = [];
+	_stackFILO : Array<IAction> = [];
 
 
 
@@ -37,15 +37,15 @@ class ActionStack {
      */  
     putOnStack(action :IAction): void {
         this.isCompleted = false;
-        this._stackFIFO.push(action);
+        this._stackFILO.push(action);
         this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
     }
 
 
 
     run(): void {
-    	if (this._stackFIFO.length != 0) {
-    		var action: IAction = this._stackFIFO[0];
+    	if (this._stackFILO.length != 0) {
+    		var action: IAction = this._stackFILO[this._stackFILO.length -1];
 			
             if (action.isEmpty())
                 this.runAction(action); // log & remove 
@@ -64,7 +64,7 @@ class ActionStack {
     private runComplexAction(action: IAction): void {
         var action: IAction = action.getNextAction();
         if (action != null) {
-            this._stackFIFO.unshift(action);
+            this._stackFILO.push(action);
             this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
         }
 		this.callRunAsync();	    	
@@ -73,7 +73,7 @@ class ActionStack {
 
 
     private runAction(action: IAction): void {
-    	this._stackFIFO.shift();
+    	this._stackFILO.pop();
     	try {
     		
             if (this.onBeforeAction != null)
@@ -93,6 +93,8 @@ class ActionStack {
         }	    		
 		this.callRunAsync();
     }
+
+
 
     private callRunAsync(): void {
         //this.run();

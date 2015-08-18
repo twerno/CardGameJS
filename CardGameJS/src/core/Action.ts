@@ -1,5 +1,7 @@
-///<reference path="../Utils/Collections/List.ts"/>
 ///<reference path="../core/GameEvents.ts"/>
+
+
+
 
 
 /*
@@ -24,6 +26,8 @@ interface IAction {
 
 
 
+
+
 /*
  *  SimpleAction
  */	
@@ -33,33 +37,50 @@ class SimpleAction implements IAction {
 	
 	runAction: (self: IAction) => void = null;
 	
+	
+	
+	
 	constructor (parent: IAction) {
 		this.parent = parent;
 	}
+	
+	
 	
 	getNextAction(): IAction {
 		return null;
 	}
 	
+	
+	
 	isComplex(): boolean {
 		return false;
 	}
+	
+	
 	
 	isExecutable(): boolean {
 		return true;
 	}
 	
+	
+	
 	isEmpty(): boolean {
 		return this.runAction === null;	
 	}
+	
+	
 	
 	executeAction(): void {
 		this.runAction === null || this.runAction(this);	
 	};
 	
+	
+	
     toString(): string {
         return this.constructor['name'];
     }
+    
+    
 
     getChain(): Array<IAction> {
     	if (this.parent === null)
@@ -83,6 +104,9 @@ class AtomicAction extends SimpleAction {
 	
 	private optionalName: string = '';
 	
+	
+	
+	
 	constructor (parent: IAction, 
 	             runAction: (self: IAction) => void, 
 		         optionalName: string = '') {
@@ -90,6 +114,8 @@ class AtomicAction extends SimpleAction {
 		this.runAction = runAction;
 		this.optionalName = optionalName;
 	}
+	
+	
 	
     toString(): string {
         return (this.optionalName === '') ? this.constructor['name'] : this.optionalName;
@@ -109,33 +135,53 @@ class Actions implements IAction {
 	
 	actionsFIFO : Array<IAction> = [];
 	
+	
+	
+	
 	constructor(parent: IAction) {
 		this.parent = parent;
 	}
 	
+	
+	
+	/**
+	 *  Return actions in natural order
+	 */
 	getNextAction(): IAction {
 		return this.actionsFIFO.shift() || null;
 	}
+	
+	
 	
 	isComplex(): boolean {
 		return true;
 	}
 	
+	
+	
 	isExecutable(): boolean {
 		return false;
 	}
+	
+	
 	
 	isEmpty(): boolean {
 		return this.actionsFIFO.length === 0;	
 	}
 	
+	
+	
 	executeAction(): void {
 		throw new Error('not executable'); 
 	};		
 	
+	
+	
     toString(): string {
         return this.constructor['name'];
     }
+
+
 
     getChain(): Array<IAction> {
     	if (this.parent === null)
@@ -147,6 +193,8 @@ class Actions implements IAction {
     	}
     }
 
+
+
     pushMany(actions: Array<IAction>): void {
         if (actions != null)
             for (var i = 0; i < actions.length; i++) {
@@ -156,13 +204,20 @@ class Actions implements IAction {
 }
 
 
+
+
+
 /**
  *  DispatchEventAction
  */ 
 class DispatchEventAction extends Actions {
 	
+	private initialized : boolean = false;
+	
 	event    : core.IEvent;
 	eventMgr : core.EventManager;
+
+
 
 
 	constructor(parent: IAction, event: core.IEvent, eventMgr: core.EventManager) {
@@ -170,21 +225,45 @@ class DispatchEventAction extends Actions {
 		
 		this.event    = event;
 		this.eventMgr = eventMgr;
-
-        var handlerObj : core.IHandlerObj;
-    	for (var handlerIdx in eventMgr.handlers._list) {
-            handlerObj = eventMgr.handlers._list[handlerIdx];
-    		if (handlerObj.eventType === event.eventType) {
-                this.actionsFIFO.push(new EventAction(event, handlerObj));
-    		}
-    	}	
 	}
+	
+	
+	
+	getNextAction(): IAction {
+		this.initialized || this.initializeEventHandlers();
+		return super.getNextAction();
+	}
+
+
+	
+	isEmpty(): boolean {
+		return this.initialized && super.isEmpty();	
+	}
+
 
 
     toString(): string {
         return super.toString() +' (' +this.event.eventType +')';
     }
+
+
+
+    private initializeEventHandlers(): void {
+		var handlerObj  : core.IHandlerObj;
+
+    	for (var idx = 0; idx < this.eventMgr.handlers._list.length; idx++) {
+            handlerObj = this.eventMgr.handlers._list[idx];
+    		if (handlerObj.eventType === this.event.eventType) 
+                this.actionsFIFO.push(
+                	new EventAction(this.event, handlerObj)
+                );
+    	}
+    	this.initialized = true;    	 	
+    }
 }
+
+
+
 
 
 /**
@@ -194,6 +273,9 @@ class EventAction extends Actions {
 
 	event      : core.IEvent;
 	handlerObj : core.IHandlerObj;
+
+
+
 
     constructor(event: core.IEvent, handlerObj: core.IHandlerObj) {
         super(null);
