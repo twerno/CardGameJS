@@ -25,6 +25,7 @@
     <TypeScriptCompile Include="src\board_and_pieces\Card.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Counter.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Effect.ts" />
+    <TypeScriptCompile Include="src\board_and_pieces\GameObjects.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\GameBoard.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\GameObject.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\GameObjectID.ts" />
