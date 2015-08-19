@@ -37,6 +37,7 @@
     <TypeScriptCompile Include="src\core\GameEvents.ts" />
     <TypeScriptCompile Include="src\core\GameMgr.ts" />
     <TypeScriptCompile Include="src\core\IDIsposable.ts" />
+    <TypeScriptCompile Include="src\core\Task.ts" />
     <TypeScriptCompile Include="src\utils\collections\IList.ts" />
     <TypeScriptCompile Include="src\utils\collections\IMap.ts" />
     <TypeScriptCompile Include="src\utils\collections\List.ts" />

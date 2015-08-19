@@ -11,15 +11,15 @@ class BuyABeerAction extends Actions {
     	super(parent);
 
     	this.actionsFIFO.push(new GoToALocalShopAction(this));
-        this.pushMany([new LookForABeerAction(this, new BeerFoundEvent(new Beer()))]);
+        //this.pushMany([new LookForABeerAction(this, new BeerFoundEvent(new Beer()))]);
     	
     	this.actionsFIFO.push(
-    		new AtomicAction(this,
-    			function(self: BuyABeerAction): void {
-            		// do something
-        	    }, 'optionalName'));
+    		new SimpleAction(this,
+    			function(self: SimpleAction, onSuccess: IResultCallback, onError: IErrorCallback): void {
+            		onSuccess(null);
+        	    }));
     	
-    	this.actionsFIFO.push(new GoHomeAction(this));
+    	//this.actionsFIFO.push(new GoHomeAction(this));
     }                                                                                                   
 }
 
@@ -40,12 +40,12 @@ class GoHomeAction extends SimpleAction {
 }       
 
 // dispatch an event action
-class LookForABeerAction extends DispatchEventAction {
+//class LookForABeerAction extends DispatchEventAction {
 
-    constructor(parent: IAction, event: core.IEvent) {
-        super(parent, event, eventMgr);
-    }
-}
+//    constructor(parent: IAction, event: core.IEvent) {
+//        super(parent, event, eventMgr);
+//    }
+//}
 
 
 // an event
@@ -152,5 +152,5 @@ stack.onPutActionOnStack =
     }
 
 document.writeln('<div id="log" class="container-fluid">')
-stack.putOnStack(new BuyABeerAction(null));
+stack.putOnTop(new BuyABeerAction(null));
 stack.run();

@@ -1,4 +1,4 @@
-///<reference path="../Utils/Collections/List.ts"/>
+﻿///<reference path="../Utils/Collections/List.ts"/>
 ///<reference path="../core/GameEvents.ts"/>
 ///<reference path="Action.ts"/>	
 
@@ -35,9 +35,20 @@ class ActionStack {
     /*
      *  putOnStack
      */  
-    putOnStack(action :IAction): void {
+    putOnTop(action :IAction): void {
         this.isCompleted = false;
         this._stackFILO.push(action);
+        this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
+    }
+
+
+
+    /*
+     *  putAtBottom
+     */  
+    putAtBottom(action :IAction): void {
+        this.isCompleted = false;
+        this._stackFILO.unshift(action);
         this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
     }
 
@@ -64,10 +75,10 @@ class ActionStack {
     private runComplexAction(action: IAction): void {
         var action: IAction = action.getNextAction();
         if (action != null) {
-            this._stackFILO.push(action);
+            this.putOnTop(action);
             this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
         }
-		this.callRunAsync();	    	
+		this.run();	    	
     }
 
 
@@ -80,29 +91,41 @@ class ActionStack {
                 for (var i = 0; i < this.onBeforeAction.length(); i++)
                     this.onBeforeAction.get(i)(this, action);
 
-            action.isExecutable() && action.executeAction();
-    		
-	        if (this.onActionSuccess != null)
-	            for (var i = 0; i < this.onActionSuccess.length(); i++)
-	                this.onActionSuccess.get(i)(this, action);
-
-        } catch (err) {
-            if (this.onError != null)
-                for (var i = 0; i < this.onError.length(); i++)
-                    this.onError.get(i)(this, action, err);
+            if (action.isExecutable()) {
+                new TaskRunner(action, this._onSuccess, this._onError, this._onTimeout, 3*1000)
+                    .runAsync();
+            } else
+                new DummyTaskRunner(action, this._onSuccess)
+                    .runAsync(); 
+            
+            
+        } catch (error) {
+            this.callErrorCalbacks(action, error);
         }	    		
-		this.callRunAsync();
     }
 
 
+    private _onSuccess: ITaskHandler = function(task: ITask, result: Object): void {
+	    if (this.onActionSuccess != null)
+	        for (var i = 0; i < this.onActionSuccess.length(); i++)
+	            this.onActionSuccess.get(i)(this, task);
 
-    private callRunAsync(): void {
-        //this.run();
-        var self: ActionStack = this;
+        this.run();
+    }.bind(this);
 
-        setTimeout(
-            function callRun():void {
-                self.run();
-            }, 1);
+
+    private _onError: ITaskErrorHandler = function(action: IAction, error: Error): void {
+        this.callErrorCalbacks(action, error);
+    }.bind(this);
+
+
+    private _onTimeout: ITaskHandler = function(task: ITask): void {
+        this._onError(task, new Error('timeout'));
+    }.bind(this);
+
+    private callErrorCalbacks(action: IAction, error: Error): void {
+        if (this.onError != null)
+            for (var i = 0; i < this.onError.length(); i++)
+                this.onError.get(i)(this, action, error);
     }
 }
