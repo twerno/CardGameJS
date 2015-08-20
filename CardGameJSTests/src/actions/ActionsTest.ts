@@ -5,17 +5,17 @@ class Beer {};
 var eventMgr : core.EventManager = new core.EventManager();
 
 
-class BuyABeerAction extends Actions {
+class BuyABeerAction extends ActionList {
 	
     constructor(parent: IAction) {
     	super(parent);
 
-    	this.actionsFIFO.push(new GoToALocalShopAction(this));
+    	this.push(new GoToALocalShopAction(this));
         //this.pushMany([new LookForABeerAction(this, new BeerFoundEvent(new Beer()))]);
     	
-    	this.actionsFIFO.push(
-    		new SimpleAction(this,
-    			function(self: SimpleAction, onSuccess: IResultCallback, onError: IErrorCallback): void {
+    	this.push(
+    		new Action(this,
+    			function(self: Action, onSuccess: IResultCallback, onError: IErrorCallback): void {
             		onSuccess(null);
         	    }));
     	
@@ -24,7 +24,7 @@ class BuyABeerAction extends Actions {
 }
 
 
-class GoToALocalShopAction extends Actions {
+class GoToALocalShopAction extends ActionList {
 
     constructor(parent: IAction) {
         super(parent);
@@ -32,7 +32,7 @@ class GoToALocalShopAction extends Actions {
 }
 
 // empty action
-class GoHomeAction extends SimpleAction {
+class GoHomeAction extends Action {
 
     toString():string {
         return super.toString();
@@ -64,7 +64,7 @@ class BeerFoundEvent implements core.IEvent {
 
 
 // onBeerFoundEvent
-class TakeBeerAction extends Actions {
+class TakeBeerAction extends ActionList {
 
     beer : Beer;
 
@@ -77,7 +77,7 @@ class TakeBeerAction extends Actions {
     }
 }
 
-class PayForABeerAction extends Actions {
+class PayForABeerAction extends ActionList {
     beer : Beer;
 
     constructor(parent: IAction, beer: Beer) {
@@ -125,7 +125,7 @@ stack.onBeforeAction.add(
 
 stack.onError.add(
         function (stack: ActionStack, action: IAction, err: Error): void {
-        console.log('onError - ' + action.toString() +'\n' +err, action.getChain(), err);
+        console.log('onError - ' + action.toString() +'\n' +err, ActionHelper.getChain(action), err);
         documentWrite('<div class="row">'
                         +'<div class="col-xs-2">onError</div>'
                         +'<div class="col-xs-3">' +action +'</div>'

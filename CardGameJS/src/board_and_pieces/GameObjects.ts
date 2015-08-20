@@ -1,6 +1,6 @@
 ///<reference path="../Utils/Collections/Map.ts"/>
 ///<reference path="../Utils/Collections/List.ts"/>
-///<reference path="../core/Action.ts"/>
+///<reference path="../core/actions/Action.ts"/>
 ///<reference path="../core/EventManager.ts"/>
 
 interface GameObjectId {

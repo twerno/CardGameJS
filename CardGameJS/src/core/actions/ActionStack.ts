@@ -1,6 +1,8 @@
-﻿///<reference path="../Utils/Collections/List.ts"/>
-///<reference path="../core/GameEvents.ts"/>
-///<reference path="Action.ts"/>	
+﻿///<reference path="../../Utils/Collections/List.ts"/>
+///<reference path="../GameEvents.ts"/>
+///<reference path="Action.ts"/>
+///<reference path="Task.ts"/>
+	
 
 
 interface IStackErrorCallback { (stack: ActionStack, action: IAction, error: Error): void; }
@@ -76,8 +78,8 @@ class ActionStack {
         var action: IAction = action.getNextAction();
         if (action != null) {
             this.putOnTop(action);
-            this.onPutActionOnStack === null || this.onPutActionOnStack(this, action);
-        }
+        } else 
+            this._stackFILO.pop(); // complex action finished
 		this.run();	    	
     }
 
@@ -105,7 +107,7 @@ class ActionStack {
     }
 
 
-    private _onSuccess: ITaskHandler = function(task: ITask, result: Object): void {
+    private _onSuccess: ITaskHandler = function(task: IAction, result: Object): void {
 	    if (this.onActionSuccess != null)
 	        for (var i = 0; i < this.onActionSuccess.length(); i++)
 	            this.onActionSuccess.get(i)(this, task);
@@ -119,10 +121,11 @@ class ActionStack {
     }.bind(this);
 
 
-    private _onTimeout: ITaskHandler = function(task: ITask): void {
+    private _onTimeout: ITaskHandler = function(task: IAction): void {
         this._onError(task, new Error('timeout'));
     }.bind(this);
 
+	
     private callErrorCalbacks(action: IAction, error: Error): void {
         if (this.onError != null)
             for (var i = 0; i < this.onError.length(); i++)

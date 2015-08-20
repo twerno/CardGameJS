@@ -1,4 +1,4 @@
-﻿///<reference path="Action.ts"/>	
+﻿///<reference path="actions/Action.ts"/>	
 
 module core {
 

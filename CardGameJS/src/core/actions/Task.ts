@@ -1,28 +1,39 @@
-﻿                                                       
-interface ITask {
-    worker: ITaskWorker;
-
-    applyResult(result: Object): void;
+﻿				 
+enum TaskState { 
+    SUCCESS,
+    FAIULE,
+    CANCEL,
+    UNKNOWN
 }
 
-interface IComplexTask extends ITask {
-    
-}
 
 interface IResultCallback { (result: Object): void }
 interface IErrorCallback { (error: Error): void }
 
 interface ITaskHandler { (task: ITask): void; }
-interface ITaskSucceessHandler { (task: ITask, result: Object): void; }
+interface ITaskSucceessHandler { (task: ITask, result: ITaskResult): void; }
 interface ITaskErrorHandler { (task: ITask, error: Error): void; }
 interface ITaskWorker { (self: ITask, onSuccess: IResultCallback, onError: IErrorCallback): void }
+
+
+ interface ITask {
+    worker: ITaskWorker;
+
+    applyResult(result: Object): void;
+}
 
 
 interface ITaskRunner {
     runAsync(): void;
 }
 
-class TaskRunner implements ITaskRunner, IDisposable {
+interface ITaskResult {
+	task_state: TaskState;
+}
+
+
+
+class TaskRunner implements ITaskRunner {
 
     private _task: ITask = null;
     private _timeoutHandler: number;
@@ -59,18 +70,19 @@ class TaskRunner implements ITaskRunner, IDisposable {
     }
 
 
-    dispose(): void {
+    private dispose(): void {
         clearTimeout(this._timeoutHandler);
-        this._timeoutHandler = null;
+
+        this._task = null;
+		this._timeoutHandler = null;
         this._timeout = null;
         this._onSuccess = null;
         this._onError = null;
         this._onTimeout = null;
-        this._task = null;
     }
 
 
-    private _internalOnSuccess = function(result: Object): void {
+    private _internalOnSuccess = function(result: ITaskResult): void {
         clearTimeout(this._timeoutHandler);
         this._task.applyResult(result);
         this._onSuccess === null || setTimeout(this._onSuccess, 1, this._task, result);
@@ -93,7 +105,9 @@ class TaskRunner implements ITaskRunner, IDisposable {
 
 }
 
-class DummyTaskRunner implements ITaskRunner, IDisposable {
+
+
+class DummyTaskRunner implements ITaskRunner {
 
     private _task : ITask;
     private _onSuccess: ITaskSucceessHandler;
@@ -111,7 +125,7 @@ class DummyTaskRunner implements ITaskRunner, IDisposable {
     }
 
 
-    dispose(): void {
+    private dispose(): void {
         this._task = null;
         this._onSuccess = null;
     }
