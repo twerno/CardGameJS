@@ -18,19 +18,22 @@ class ActionHelper {
 }
 
 
+enum ActionExecutionMode {
+    WORKER,
+    SUB_ACTION 
+}
+
 
 /*
  *  IAction
  */
 interface IAction extends ITask {
 	
-	getNextAction(): IAction;
+	nextSubAction(): IAction;
 	
-	isComplex(): boolean;
-	
-	isExecutable(): boolean;
-	
-	isEmpty(): boolean;
+    executionMode(): ActionExecutionMode;
+
+    isFinished(): boolean;
 
 	parent: IAction;
 }
@@ -40,6 +43,8 @@ interface IAction extends ITask {
 
 
 class Action implements IAction {
+
+    private _isFinished: boolean = false;
 
 	private _parent: IAction = null;
 	
@@ -52,21 +57,21 @@ class Action implements IAction {
 	}
 
 
-    applyResult(result: ITaskResult) : void {}
+    applyResult(result: ITaskResult) : void {
+        this._isFinished = true;
+    }
 	
-	getNextAction()  : IAction     {return null}
+	nextSubAction() : IAction             {return null}
+
+    executionMode() : ActionExecutionMode {return ActionExecutionMode.WORKER}
+
+    isFinished()    : boolean             {return this._isFinished}
 	
-	isExecutable()   : boolean     {return true}
+	get parent()    : IAction             {return this._parent}
 	
-	isComplex()      : boolean     {return false}
+	get worker()    : ITaskWorker         {return this._worker}
 	
-	get parent()     : IAction     {return this._parent}
-	
-	get worker()     : ITaskWorker {return this._worker}
-	
-	isEmpty()        : boolean     {return this._worker === null}
-	
-    toString()       : string      {return this.constructor['name']}
+    toString()      : string              {return this.constructor['name']}
 }
 
 
@@ -87,7 +92,7 @@ class ActionList extends Action {
 	/**
 	 *  Return actions in natural order
 	 */
-	getNextAction(): IAction {
+	nextSubAction(): IAction {
 		return this.actionList.shift() || null;
 	}
 	
@@ -104,12 +109,16 @@ class ActionList extends Action {
                 this.actionList.push(actions[i]);
             }
     }
-	
-	
 
-	isComplex()    : boolean {return true}
-	
-	isExecutable() : boolean {return false}
-	
-	isEmpty()      : boolean {return this.actionList.length === 0}
+    executionMode() : ActionExecutionMode {return ActionExecutionMode.SUB_ACTION}
+
+    isFinished()    : boolean             {return this.actionList.length === 0}
 }
+
+
+
+///*
+// *  ActionList
+// */	
+//class ActionList extends Action {
+//}

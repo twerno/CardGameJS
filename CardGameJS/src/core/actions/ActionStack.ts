@@ -27,6 +27,8 @@ class ActionStack {
     onBeforeAction : Collections.List<IStackActionCallback> = new Collections.List<IStackActionCallback>();
 
     onPutActionOnStack : IStackActionCallback = null;
+
+    onRemoveActionFromStack : IStackActionCallback = null;
     
 
 	private isCompleted: boolean = false;
@@ -60,11 +62,13 @@ class ActionStack {
     	if (this._stackFILO.length != 0) {
     		var action: IAction = this._stackFILO[this._stackFILO.length -1];
 			
-            if (action.isEmpty())
-                this.runAction(action); // log & remove 
+            if (action.isFinished())
+                this.removeFromStack(); // log & remove & rerun 
             else {
-			    action.isComplex() && this.runComplexAction(action);
-			    !action.isComplex() && this.runAction(action);
+                if (action.executionMode() === ActionExecutionMode.SUB_ACTION) {
+                    this.runSubAction(action);
+                } else if (action.executionMode() === ActionExecutionMode.WORKER)
+                    this.runWorker(action);
             }
     	} else { 
     		this.onStackComplete != null && !this.isCompleted && this.onStackComplete(this);
@@ -74,36 +78,42 @@ class ActionStack {
 
 
 
-    private runComplexAction(action: IAction): void {
-        var action: IAction = action.getNextAction();
-        if (action != null) {
+    private runSubAction(action: IAction): void {
+        var action: IAction = action.nextSubAction();
+        if (action != null) 
+        {
             this.putOnTop(action);
-        } else 
-            this._stackFILO.pop(); // complex action finished
-		this.run();	    	
+            this.run();
+        } 
+        else 
+        {
+            throw new Error('[' +action +'] extSubAction returned null');
+        }	    	
     }
 
 
 
-    private runAction(action: IAction): void {
-    	this._stackFILO.pop();
+    private runWorker(action: IAction): void {
     	try {
     		
             if (this.onBeforeAction != null)
                 for (var i = 0; i < this.onBeforeAction.length(); i++)
                     this.onBeforeAction.get(i)(this, action);
 
-            if (action.isExecutable()) {
-                new TaskRunner(action, this._onSuccess, this._onError, this._onTimeout, 3*1000)
-                    .runAsync();
-            } else
-                new DummyTaskRunner(action, this._onSuccess)
-                    .runAsync(); 
-            
-            
+            new TaskRunner(action, this._onSuccess, this._onError, this._onTimeout, 3*1000)
+                .runAsync();
+
         } catch (error) {
             this.callErrorCalbacks(action, error);
         }	    		
+    }
+
+
+
+    private removeFromStack(): void {
+        var action: IAction = this._stackFILO.pop();
+        this.onRemoveActionFromStack === null || this.onRemoveActionFromStack(this, action);
+        this.run();
     }
 
 

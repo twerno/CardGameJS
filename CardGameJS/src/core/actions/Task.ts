@@ -1,7 +1,7 @@
 ﻿				 
 enum TaskState { 
     SUCCESS,
-    FAIULE,
+    FAILURE,
     CANCEL,
     UNKNOWN
 }

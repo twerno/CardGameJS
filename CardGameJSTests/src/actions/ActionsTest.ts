@@ -151,6 +151,16 @@ stack.onPutActionOnStack =
                         +'</div>');
     }
 
+stack.onRemoveActionFromStack =
+    function(stack: ActionStack, action: IAction): void {
+        documentWrite('<div class="row">'
+                        +'<div class="col-xs-2">onRemoveActionFromStack</div>'
+                        +'<div class="col-xs-3">' +action +'</div>'
+//        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
+//        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
+                        +'</div>');
+    }
+
 document.writeln('<div id="log" class="container-fluid">')
 stack.putOnTop(new BuyABeerAction(null));
 stack.run();
