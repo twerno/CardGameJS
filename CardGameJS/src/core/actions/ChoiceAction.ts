@@ -2,7 +2,7 @@
 ///<reference path="Task.ts"/>
 
 
-enum ChoiceActionState {
+enum ChooseActionState {
 	NEW,
 	POPULATING_CHOICE_LIST,
 	POPULATED_CHOICE_LIST,
@@ -36,11 +36,12 @@ interface IGenerateChoicesActionResult extends ITaskResult {
 	choices: Array<IChoice>;
 }
 
-interface IMakeAChoiceActionResult extends ITaskResult {
+class MakeAChoiceActionResult implements ITaskResult {
+    task_state: TaskState = TaskState.UNKNOWN;
 	selected: Array<IChoice>;
 }
 
-interface IValidateSelectedChoicesActionResult extends ITaskResult {
+interface IValidateSelectedActionResult extends ITaskResult {
 	validation_state : ValiationState;
 	details : Array<IValidationDetail>;
 }
@@ -50,15 +51,15 @@ interface IChooseActionResult extends ITaskResult {
 } 
 
 
-class ChoiceSubAction extends Action {
+class ChooseActionSub extends Action {
 
-    getParent(): ChoiceAction {
-        return <ChoiceAction> this.parent;
+    getParent(): ChooseAction {
+        return <ChooseAction> this.parent;
     }
 }
 
 
-class ChoiceActionOptions {
+class ChooseActionOptions {
     accept_when_choice_list_is_empty: boolean = true;
 
     choice_is_optional: boolean = true;
@@ -67,15 +68,16 @@ class ChoiceActionOptions {
 
 
 
-class GenerateChoicesAction extends ChoiceSubAction {
+class GenerateChoicesAction extends ChooseActionSub {
 
     result: IGenerateChoicesActionResult = null;
 
 
 	applyResult(result: IGenerateChoicesActionResult): void {
+        
         this.result = result;
 				
-		this.getParent().state = ChoiceActionState.POPULATED_CHOICE_LIST;
+		this.getParent().state = ChooseActionState.POPULATED_CHOICE_LIST;
     }
 	
 	
@@ -83,49 +85,56 @@ class GenerateChoicesAction extends ChoiceSubAction {
 
 
 
-class MakeAChoiceAction extends ChoiceSubAction {
+class MakeAChoiceAction extends ChooseActionSub {
 
 	choices: Array<IChoice> = [];
 	
-	validationResult : IValidateSelectedChoicesActionResult = null;
+	validationResult : IValidateSelectedActionResult = null;
 
 
     // TaskState.success === selected at least one target
     // TaskState.cancel  === no target selected; action cancelled by user
-    result: IMakeAChoiceActionResult = null;
+    result: MakeAChoiceActionResult = null;
 	
 
 
-	applyResult(result: IMakeAChoiceActionResult): void {
+	applyResult(result: MakeAChoiceActionResult): void {
 		
         this.result = result;
 		
-		this.getParent().state = ChoiceActionState.SELECTED;
+		this.getParent().state = ChooseActionState.SELECTED;
     }
+
+
+    //getParent(): ChoiceAction {
+    //    return <ChoiceAction> this.parent;
+    //}
 }
 
 
 
 
-class ValidateSelectedChoicesAction extends ChoiceSubAction {
+class ValidateSelectedChoicesAction extends ChooseActionSub {
 
 	choices: Array<IChoice> = [];
 	
 	selected: Array<IChoice> = [];
 
-    options: ChoiceActionOptions;
+    options: ChooseActionOptions;
 	
  
-	result : IValidateSelectedChoicesActionResult;
+	result : IValidateSelectedActionResult;
 
 
 
-	applyResult(result: IValidateSelectedChoicesActionResult): void {
+	applyResult(result: IValidateSelectedActionResult): void {
 		
+        this.result = result;
+
 		if (this.result.validation_state === ValiationState.VALID)
-			this.getParent().state = ChoiceActionState.VALID;
+			this.getParent().state = ChooseActionState.VALID;
 		else
-			this.getParent().state = ChoiceActionState.NOT_VALID;
+			this.getParent().state = ChooseActionState.NOT_VALID;
     }
 }
 
@@ -138,9 +147,9 @@ class ValidateSuccessAction extends Action {
 
 
 
-class ChoiceAction extends Action {
+class ChooseAction extends Action {
 
-	_state : ChoiceActionState = ChoiceActionState.NEW;
+	_state : ChooseActionState = ChooseActionState.NEW;
 	
 	generateChoicesAction: GenerateChoicesAction = null;
 	
@@ -148,7 +157,7 @@ class ChoiceAction extends Action {
 	
 	validateAction: ValidateSelectedChoicesAction = null;
 	
-    options: ChoiceActionOptions = new ChoiceActionOptions();
+    options: ChooseActionOptions = new ChooseActionOptions();
 
 	result: IChooseActionResult = {
         task_state: TaskState.UNKNOWN,
@@ -158,24 +167,24 @@ class ChoiceAction extends Action {
 	
 
 	nextSubAction(): IAction {
-		if (this._state === ChoiceActionState.NEW) {
-			this._state === ChoiceActionState.POPULATING_CHOICE_LIST;
+		if (this._state === ChooseActionState.NEW) {
+			this._state === ChooseActionState.POPULATING_CHOICE_LIST;
 			
 			return this.generateChoicesAction;
 		}
 		
 		
-		else if (this.state === ChoiceActionState.POPULATED_CHOICE_LIST) {
+		else if (this.state === ChooseActionState.POPULATED_CHOICE_LIST) {
 
             // choice list not empty
             if (this.generateChoicesAction.result.choices.length != 0) {
-			    this._state = ChoiceActionState.CHOOSING;
+			    this._state = ChooseActionState.CHOOSING;
 			    this.makeAChoiceAction.choices = this.generateChoicesAction.result.choices;
 			    this.makeAChoiceAction.validationResult = null;
 			
 			    return this.makeAChoiceAction;
             } else { // choice_list is empty
-                this.state = ChoiceActionState.FINISHED;
+                this.state = ChooseActionState.FINISHED;
 
                 
                 if (this.options.choice_is_optional || this.options.accept_when_choice_list_is_empty) {
@@ -189,11 +198,11 @@ class ChoiceAction extends Action {
 		}
 		
 		
-		else if (this.state === ChoiceActionState.SELECTED) {
+		else if (this.state === ChooseActionState.SELECTED) {
 
             // selected at least one target 
             if (this.validateAction.result.task_state === TaskState.SUCCESS) {
-			    this._state === ChoiceActionState.VALIDATING;
+			    this._state === ChooseActionState.VALIDATING;
 
                 this.validateAction.options = this.options;
 			    this.validateAction.choices = this.generateChoicesAction.result.choices; 
@@ -201,15 +210,15 @@ class ChoiceAction extends Action {
 			
 			    return this.validateAction;
             } else if (this.validateAction.result.task_state === TaskState.CANCEL) {
-                this._state === ChoiceActionState.FINISHED;
+                this._state === ChooseActionState.FINISHED;
                 this.result.task_state = TaskState.CANCEL; // no target selected; action canceled by user
                 return null;
             }
 		}
 		
 		
-		else if (this.state === ChoiceActionState.NOT_VALID) {
-			this._state === ChoiceActionState.CHOOSING;
+		else if (this.state === ChooseActionState.NOT_VALID) {
+			this._state === ChooseActionState.CHOOSING;
 			this.makeAChoiceAction.choices = this.generateChoicesAction.result.choices;
 			this.makeAChoiceAction.validationResult = this.validateAction.result;
 			
@@ -217,8 +226,8 @@ class ChoiceAction extends Action {
 		}
 		
 		
-		else if (this.state === ChoiceActionState.VALID) {
-			this._state === ChoiceActionState.FINISHED;
+		else if (this.state === ChooseActionState.VALID) {
+			this._state === ChooseActionState.FINISHED;
             
             this.result.task_state = TaskState.SUCCESS;
             this.generateChoicesAction.result.choices = this.generateChoicesAction.result.choices.concat();
@@ -232,24 +241,62 @@ class ChoiceAction extends Action {
 	
 	applyResult(result: ITaskResult) : void {}
 
-	get state()     : ChoiceActionState   {return this._state}
+	get state()       : ChooseActionState   {return this._state}
 	
-	get worker()    : ITaskWorker         {return null}
+	get asyncWorker() : ITaskAsyncWorker    {return null}
 
-    executionMode() : ActionExecutionMode {return ActionExecutionMode.SUB_ACTION}
+    executionMode()   : ActionExecutionMode {return ActionExecutionMode.SUB_ACTION}
 
-    isFinished()    : boolean             {return this.result.task_state != TaskState.UNKNOWN}
-	
+    isFinished()      : boolean             {return this.result.task_state != TaskState.UNKNOWN}
 }
+
 
 
 
 
 class MakeChoiceAtRandomAction extends MakeAChoiceAction {
 
+    private getARandomAction : GetARandomAction = new GetARandomAction(this);
+
+	nextSubAction(): IAction {
+        if (!this.getARandomAction.isFinished())
+            return this.getARandomAction;
+        return null;
+    }
+
+
+    executionMode() : ActionExecutionMode {
+        if (this.getARandomAction.isFinished())
+            return ActionExecutionMode.WORKER;
+        else
+            return ActionExecutionMode.SUB_ACTION;
+    }
+
+
+    get asyncWorker() : ITaskAsyncWorker {return this.__worker}
+
+
+    private __worker(self: ITask, onSuccess: IResultCallback, onError: IErrorCallback): void {
+        var result: MakeAChoiceActionResult = new MakeAChoiceActionResult();
+        result.task_state = TaskState.SUCCESS;
+
+        if (this.choices.length === 0) {
+            onSuccess(result);
+            return;
+        }
+
+        var selectedIdx : number;
+
+        for (var i = 0; i < this.getARandomAction.result.randomNumbers.length; i++) {
+            selectedIdx = this.getARandomAction.result.randomNumbers[i] % this.choices.length;
+            result.selected.push(this.choices[selectedIdx]);
+        }
+        onSuccess(result);
+        return;
+    }
+
 }
 
+//class ChooseAtRandomAction extends ChoiceAction {
 
-class ChooseAtRandomAction extends ChoiceAction {
-
-} 
+//} 

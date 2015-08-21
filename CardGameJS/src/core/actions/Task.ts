@@ -13,11 +13,11 @@ interface IErrorCallback { (error: Error): void }
 interface ITaskHandler { (task: ITask): void; }
 interface ITaskSucceessHandler { (task: ITask, result: ITaskResult): void; }
 interface ITaskErrorHandler { (task: ITask, error: Error): void; }
-interface ITaskWorker { (self: ITask, onSuccess: IResultCallback, onError: IErrorCallback): void }
+interface ITaskAsyncWorker { (self: ITask, onSuccess: IResultCallback, onError: IErrorCallback): void }
 
 
  interface ITask {
-    worker: ITaskWorker;
+    asyncWorker: ITaskAsyncWorker;
 
     applyResult(result: Object): void;
 }
@@ -59,10 +59,10 @@ class TaskRunner implements ITaskRunner {
 
 
     runAsync(): void {
-        if (this._task.worker === null)
+        if (this._task.asyncWorker === null)
             throw new Error(this._task.toString() +' - worker is not defined');
 
-        setTimeout(this._task.worker, 1,
+        setTimeout(this._task.asyncWorker, 1,
             this._task, this._internalOnSuccess, this._internalOnError);
 
         if (this._timeout > 0)

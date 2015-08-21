@@ -1,4 +1,3 @@
-
 ///<reference path="Task.ts"/>
 
 
@@ -36,6 +35,8 @@ interface IAction extends ITask {
     isFinished(): boolean;
 
 	parent: IAction;
+
+    applyResult(result: ITaskResult): void;
 }
 
 
@@ -48,10 +49,10 @@ class Action implements IAction {
 
 	private _parent: IAction = null;
 	
-	private _worker: ITaskWorker = null;
+	private _worker: ITaskAsyncWorker = null;
 
 	
-	constructor (parent: IAction, worker: ITaskWorker) {
+	constructor (parent: IAction, worker: ITaskAsyncWorker) {
 		this._parent = parent;
         this._worker = worker;
 	}
@@ -60,18 +61,18 @@ class Action implements IAction {
     applyResult(result: ITaskResult) : void {
         this._isFinished = true;
     }
-	
-	nextSubAction() : IAction             {return null}
+    
+    nextSubAction()   : IAction             {return null}
 
-    executionMode() : ActionExecutionMode {return ActionExecutionMode.WORKER}
+    executionMode()   : ActionExecutionMode {return ActionExecutionMode.WORKER}
 
-    isFinished()    : boolean             {return this._isFinished}
+    isFinished()      : boolean             {return this._isFinished}
 	
-	get parent()    : IAction             {return this._parent}
+	get parent()      : IAction             {return this._parent}
 	
-	get worker()    : ITaskWorker         {return this._worker}
+	get asyncWorker() : ITaskAsyncWorker    {return this._worker}
 	
-    toString()      : string              {return this.constructor['name']}
+    toString()        : string              {return this.constructor['name']}
 }
 
 
@@ -82,7 +83,7 @@ class Action implements IAction {
  */	
 class ActionList extends Action {
 	
-	actionList : Array<IAction> = [];
+	list : Array<IAction> = [];
 	
 	constructor (parent: IAction) {
 		super(parent, null);
@@ -93,27 +94,30 @@ class ActionList extends Action {
 	 *  Return actions in natural order
 	 */
 	nextSubAction(): IAction {
-		return this.actionList.shift() || null;
+		return this.list.shift() || null;
 	}
 	
 	
     push(action: IAction): void {
         if (action != null)
-            this.actionList.push(action);
+            this.list.push(action);
     }
 
 	
     pushMany(actions: Array<IAction>): void {
         if (actions != null)
             for (var i = 0; i < actions.length; i++) {
-                this.actionList.push(actions[i]);
+                this.list.push(actions[i]);
             }
     }
 
     executionMode() : ActionExecutionMode {return ActionExecutionMode.SUB_ACTION}
 
-    isFinished()    : boolean             {return this.actionList.length === 0}
+    isFinished()    : boolean             {return this.list.length === 0}
 }
+
+
+
 
 
 
