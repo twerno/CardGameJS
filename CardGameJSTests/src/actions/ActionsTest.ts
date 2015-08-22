@@ -102,6 +102,7 @@ eventMgr.addEventListener(BeerFoundEvent.EVENT_TYPE, null,
         return [new TakeBeerAction(null, event.beer)];
     });
 
+
 var stack : ActionStack = new ActionStack();
 stack.onActionSuccess.add(
     function (stack: ActionStack, action: IAction): void {
@@ -113,15 +114,12 @@ stack.onActionSuccess.add(
                         +'</div>');
     });
 
+
 stack.onBeforeAction.add(
     function (stack: ActionStack, action: IAction): void {
         console.log('onBeforeAction - ' + action.toString(), stack._stackFILO);
-        //document.writeln('<div class="row">');
-        //document.writeln('<div class="col-xs-2">onBeforeAction</div>');
-        //document.writeln('<div class="col-xs-3">' +action +'</div>');
-        //document.writeln('<div class="col-xs-4">[' +actionChain +']</div>');
-        //document.writeln('</div>');
     });
+
 
 stack.onError.add(
         function (stack: ActionStack, action: IAction, err: Error): void {
@@ -133,6 +131,7 @@ stack.onError.add(
                         +'</div>');
     });
 
+
 stack.onStackComplete = 
     function(stack: ActionStack):void {
         console.log('onStackComplete');
@@ -141,25 +140,24 @@ stack.onStackComplete =
                         +'</div>');
     };
 
+
 stack.onPutActionOnStack =
     function(stack: ActionStack, action: IAction): void {
         documentWrite('<div class="row">'
                         +'<div class="col-xs-2">onPutActionOnStack</div>'
                         +'<div class="col-xs-3">' +action +'</div>'
-//        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
-//        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
                         +'</div>');
-    }
+    };
+
 
 stack.onRemoveActionFromStack =
     function(stack: ActionStack, action: IAction): void {
         documentWrite('<div class="row">'
                         +'<div class="col-xs-2">onRemoveActionFromStack</div>'
                         +'<div class="col-xs-3">' +action +'</div>'
-//        document.writeln('<div class="col-xs-4">' +'pre: ' +action.preActions +'; post: ' +action.postActions +'</div>');
-//        document.writeln('<div class="col-xs-3">[' +stack.chain +']</div>');
                         +'</div>');
-    }
+    };
+
 
 document.writeln('<div id="log" class="container-fluid">')
 stack.putOnTop(new BuyABeerAction(null));

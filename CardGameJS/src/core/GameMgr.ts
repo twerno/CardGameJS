@@ -1,66 +1,21 @@
-//import eventMgr = require('EventManager');
+///<reference path="../board/GameObjects.ts"/>
 
-/* class Action {
+interface IGameObjectMap {
+    [key: string]: IGameObject;
+}
 
-    run(): void {
+class GameObjectMgr {
 
+    private numerator: number = 0;
+    private gameObjects: IGameObjectMap = {};
+
+    registerObject(gameObject: IGameObject): void {
+        gameObject.id = (this.numerator++).toString();
+        this.gameObjects[gameObject.id] = gameObject;
+    }
+
+    getObject(id: string): IGameObject {
+        return this.gameObjects[id] || null; 
     }
 }
 
-class onPutActionOnStackEvent extends eventMgr.EventManager.Event {
-	
-	static EVENT_TYPE = 'onPutActionOnStackEvent';
-	
-	action : Action;
-	onTopOfStack : boolean; 
-	
-	constructor (action: Action, onTopOfStack: boolean){
-		super();
-		
-		this.event_type = onPutActionOnStackEvent.EVENT_TYPE;
-		this.action = action;
-		this.onTopOfStack = onTopOfStack;
-    }
-    
-    static new(action: Action, onTopOfStack: boolean) : onPutActionOnStackEvent {
-    	return new onPutActionOnStackEvent(action, onTopOfStack);
-    }
-}
-
-class GameMgr {
-
-    dispather: eventMgr.EventManager.EventManager = new eventMgr.EventManager.EventManager();
-
-	// kolejka FILO
-    stack: Array<Action> = [];
-	currentAction : Action = null;
-	
-	
-	executeActionsOnStack() {
-//		currentAction
-	}
-
-    putActionOnTheTop(action: Action) {
-        this.stack = [action].concat(this.stack);
-
-        this.dispather.dispatch(
-        	onPutActionOnStackEvent.new(action, true),
-        	this.executeActionsOnStack
-        	
-        );
-    }
-
-    putActionOnTheBottom(action: Action) {
-		this.stack.push(action);
-		
-        this.dispather.dispatch(
-        	onPutActionOnStackEvent.new(action, false),
-        	this.executeActionsOnStack
-        );
-    }
-    
-    runStack() {
-    	
-    }
-
-} */

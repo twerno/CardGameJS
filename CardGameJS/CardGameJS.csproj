@@ -22,10 +22,10 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="src\board\GameObjects.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Card.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Counter.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\Effect.ts" />
-    <TypeScriptCompile Include="src\board_and_pieces\GameObjects.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\GameBoard.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\GameObject.ts" />
     <TypeScriptCompile Include="src\board_and_pieces\GameObjectID.ts" />
@@ -54,6 +54,7 @@
     <TypeScriptCompile Include="src\utils\WebRtc\WebRtcConsumer.ts" />
     <TypeScriptCompile Include="src\utils\WebRtc\WebRtcProducer.ts" />
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>
@@ -95,5 +96,9 @@
   <PropertyGroup>
     <PostBuildEvent>
     </PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>del "$(ProjectDir)dist\CardGameJS.d.ts"
+del "$(ProjectDir)dist\CardGameJS.js"</PreBuildEvent>
   </PropertyGroup>
 </Project>

@@ -2,16 +2,16 @@
 ///<reference path="Task.ts"/>
 
 
-class GetARandomActionResult implements ITaskResult {
+class GetARandomNumberActionResult implements ITaskResult {
     task_state: TaskState = TaskState.SUCCESS;
     randomNumbers: Array<number>;
 }
 
-class GetARandomAction extends Action {
+class GetARandomNumberAction extends Action {
 
     howMany : number = 1;
 
-    result : GetARandomActionResult = null;
+    result : GetARandomNumberActionResult = null;
 
     max : number = 10e6;
     min : number = 0;
@@ -25,8 +25,8 @@ class GetARandomAction extends Action {
 
 
 
-    private workerFn(self: GetARandomAction, onSuccess: IResultCallback, onError: IErrorCallback): void {
-        var result: GetARandomActionResult = new GetARandomActionResult();
+    private workerFn(self: GetARandomNumberAction, onSuccess: IResultCallback, onError: IErrorCallback): void {
+        var result: GetARandomNumberActionResult = new GetARandomNumberActionResult();
 
         for (var i = 0; i < self.howMany; i++) {
             result.randomNumbers.push(Math.floor(Math.random() * (this.max - this.min + 1)) + this.min);
@@ -37,7 +37,7 @@ class GetARandomAction extends Action {
 
 
 
-    applyResult(result: GetARandomActionResult) : void {
+    applyResult(result: GetARandomNumberActionResult) : void {
         super.applyResult(result);
         this.result = result;
     }

@@ -4,8 +4,8 @@
 
 enum ChooseActionState {
 	NEW,
-	POPULATING_CHOICE_LIST,
-	POPULATED_CHOICE_LIST,
+	GENERATING_CHOISES,
+	CHOICES_GENERATED,
 	CHOOSING,
 	SELECTED,
 	VALIDATING,
@@ -77,7 +77,7 @@ class GenerateChoicesAction extends ChooseActionSub {
         
         this.result = result;
 				
-		this.getParent().state = ChooseActionState.POPULATED_CHOICE_LIST;
+		this.getParent().state = ChooseActionState.CHOICES_GENERATED;
     }
 	
 	
@@ -104,11 +104,6 @@ class MakeAChoiceAction extends ChooseActionSub {
 		
 		this.getParent().state = ChooseActionState.SELECTED;
     }
-
-
-    //getParent(): ChoiceAction {
-    //    return <ChoiceAction> this.parent;
-    //}
 }
 
 
@@ -168,13 +163,13 @@ class ChooseAction extends Action {
 
 	nextSubAction(): IAction {
 		if (this._state === ChooseActionState.NEW) {
-			this._state === ChooseActionState.POPULATING_CHOICE_LIST;
+			this._state === ChooseActionState.GENERATING_CHOISES;
 			
 			return this.generateChoicesAction;
 		}
 		
 		
-		else if (this.state === ChooseActionState.POPULATED_CHOICE_LIST) {
+		else if (this.state === ChooseActionState.CHOICES_GENERATED) {
 
             // choice list not empty
             if (this.generateChoicesAction.result.choices.length != 0) {
@@ -256,7 +251,7 @@ class ChooseAction extends Action {
 
 class MakeChoiceAtRandomAction extends MakeAChoiceAction {
 
-    private getARandomAction : GetARandomAction = new GetARandomAction(this);
+    private getARandomAction : GetARandomNumberAction = new GetARandomNumberAction(this);
 
 	nextSubAction(): IAction {
         if (!this.getARandomAction.isFinished())

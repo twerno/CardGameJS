@@ -107,7 +107,8 @@ class ActionList extends Action {
     pushMany(actions: Array<IAction>): void {
         if (actions != null)
             for (var i = 0; i < actions.length; i++) {
-                this.list.push(actions[i]);
+                if (actions[i] != null)
+                    this.list.push(actions[i]);
             }
     }
 
@@ -115,14 +116,3 @@ class ActionList extends Action {
 
     isFinished()    : boolean             {return this.list.length === 0}
 }
-
-
-
-
-
-
-///*
-// *  ActionList
-// */	
-//class ActionList extends Action {
-//}
