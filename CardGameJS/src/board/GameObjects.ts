@@ -11,8 +11,9 @@ interface IGameObjectId {
     type : string;
 }
 
+
 interface IGameObject extends IGameObjectId {
-    
+    parent : IBoardObject;    
 }
 
 interface IMap<T> {
@@ -24,30 +25,23 @@ interface IBoardObject extends IGameObject {
 
     owner: Player;
 
-    source: IBoardObject; 
-
     stats: IMap<IStatCounter>;
 
-    activatedAbilities: IActivate_Ability[];
+    eventListeners: IGameEventListener[];
 
-    passiveAbilities: IPassive_Ablitity[];
+    effects: IEffect[];
     
-     
-
-    //statEffects: Array<IStatEffect>;
-
-    //tokens: Array<IToken>;
-
-    //effects: Array<IEffect>;
-
+    counters: ICounter[]; 
 }
 
 
-interface IStatCounter extends IGameObjectId {
+interface ICounter extends IGameObject {
+    counter_type : string;
+}
+
+interface IStatCounter extends IGameObject {
     
     name: string;
-
-    parent: IBoardObject;
     
     baseValue: number;
     
@@ -55,106 +49,47 @@ interface IStatCounter extends IGameObjectId {
 }
 
 
-interface ICounter extends IGameObjectId {
+interface ICounter extends IGameObject {
 
-    parent: IGameObject;
-
-
+    
 }
 
 
-interface IActivate_Ability extends IGameObjectId {
-
-    parent: IBoardObject;
+interface IActivate_Ability extends IGameObject {
 
     getAction(): IAction;
 }
 
-interface IPassive_Ablitity extends IGameObjectId {
+
+interface IGameEventListener extends IGameObject {
 
     //activator
     event_type: string;
 
-    parent: IBoardObject;
-
     getAction(): IAction;
+
+    // czy wlasciwy handler dla tego eventu
+    triggerFor(event: core.IEvent): boolean;
 }
 
 
+interface IEffect extends IGameObject {
 
-///**
-// *  STAT COUNTER
-// */
-//enum StatCounterModOper { DELTA, SET }
+    source : IBoardObject;
 
-//interface IEffect extends GameObject {
+    onAddEffect():void;
 
-//    parent: IBoardObject;
-//    effect_type: string;
+    onRemoveEffect():void;
 
-//    register(): void;
-//    unregister(): void;
-//}
+    //desc():String;
+}
 
-//interface IStatEffect extends IEffect {
-
-//    mods: Array<IStatCounterMod>;
-//}
-
-//interface IStatCounterMod {
-//    parent: IStatEffect;
-//    counterName: string;
-//    operation: StatCounterModOper;
-//    value: number;
-//}
-
-//interface IStatCounter extends GameObjectID {
-
-//    owner: IBoardObject;
-//    counterName: string;
-//    baseVal: number; // baseValue
-//    val: number;     // currentValue (before!) mods apply
+interface IZone extends IBoardObject {
     
-//    mods: Array<IStatCounterMod>;
-//    computedVal: number; // val after mods applied - has to be computed again every time mods changed
-//}
+    list: IBoardObject[];
+}
 
+interface ICard extends IBoardObject {
 
-
-
-
-
-
-
-
-
-//interface IEffect extends GameObjectId {
-//
-//    // effectType: string;
-//
-//    event_type: string; // onTokenAdd, onTokenRemove
-//    
-//    parent: GameObjectId;
-//
-//    toDesc(): Object;
-//
-//    //    action
-//}
-
-
-//interface IToken extends GameObjectID {
-//    owner: IBoardObject;
-//    tokenType: string;
-//    parent: IEffect;
-//}
-
-
-
-
-
-
-
-//interface ICard extends GameObjectID {
-
-//}
-
+    activatedAbilities: IActivate_Ability[];
+}
