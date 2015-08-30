@@ -2,19 +2,19 @@
 
 class HsCard extends Card {
 
-    cost : Counter = new Counter(this, HsConsts.COST);
+    cost: StatCounter = new StatCounter(this.owner, this, HsConsts.COST, 0);
 
-    type    : HsCardType;
-    set     : HsSet;
-    hsClass : HsClass;
-    rarity  : HsRarity; 
-    isCollectible : boolean;
+    //type    : HsCardType;
+    //set     : HsSet;
+    //hsClass : HsClass;
+    //rarity  : HsRarity; 
+    //isCollectible : boolean;
 
-    onEnterHand        : Collections.List<ICardEventHandler> = new Collections.List<ICardEventHandler>();
-    onLeaveHand        : ICardLeaveZoneHandler = null; //onPlay, onDiscard 
-    onBattlecry        : ICardEventHandler     = null; //onCast
-    onEnterBattlefield : ICardEventHandler     = null;
-    onDeathrattle      : ICardEventHandler     = null; //onLeaveBattlefield
+    //onEnterHand        : Collections.List<ICardEventHandler> = new Collections.List<ICardEventHandler>();
+    //onLeaveHand        : ICardLeaveZoneHandler = null; //onPlay, onDiscard 
+    //onBattlecry        : ICardEventHandler     = null; //onCast
+    //onEnterBattlefield : ICardEventHandler     = null;
+    //onDeathrattle      : ICardEventHandler     = null; //onLeaveBattlefield
 
     /*******/
 

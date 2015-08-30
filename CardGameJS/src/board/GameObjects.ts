@@ -1,95 +1,143 @@
-///<reference path="../Utils/Collections/Map.ts"/>
-///<reference path="../Utils/Collections/List.ts"/>
-///<reference path="../core/actions/Action.ts"/>
-///<reference path="../core/EventManager.ts"/>
+/////<reference path="../core/actions/Action.ts"/>
+/////<reference path="../core/EventManager.ts"/>
+/////<reference path="../core/IGameObjects.ts"/>
 
 
+class Attribute implements IAttribute {
+    key: string;
+    value: string;
+    parent: IGameObject;
 
+    constructor(key, value: string, parent: IGameObject) {
+        this.key = key;
+        this.value = value;
+        this.parent = parent;
+        parent.attributes[key] = this;
+    }
+}
 
-interface IGameObjectId {
-    id   : string;
-    type : string;
+class GameObject implements IGameObject {
+    id: string = '';
+    type: string = '';
+    owner: IPlayer = null;
+    attributes: IStringMap<IAttribute> = {};
 }
 
 
-interface IGameObject extends IGameObjectId {
-    parent : IBoardObject;    
+class GameBoard implements IGameBoard {
+    version: number;
+
+    zones: IStringGameObjectMap<IZone> = {};
 }
 
-interface IMap<T> {
-    [key: string] : T
-}
-
-
-interface IBoardObject extends IGameObject {
-
-    owner: Player;
-
-    stats: IMap<IStatCounter>;
-
-    eventListeners: IGameEventListener[];
-
-    effects: IEffect[];
-    
-    counters: ICounter[]; 
+class Token implements IToken {
+    owner: IPlayer;
+    source: IEffect;
+    attachedTo: IBoardObject;
+    token_type: string;
 }
 
 
-interface ICounter extends IGameObject {
-    counter_type : string;
-}
+class StatCounter implements IStatCounter {
 
-interface IStatCounter extends IGameObject {
-    
-    name: string;
-    
+    owner: IPlayer;
+    parent: IGameObject;
+
+    statID: string;
+
     baseValue: number;
+
+    value: number;
+
+    constructor(owner: IPlayer, parent: IGameObject, statID: string, baseValue: number) {
+        this.owner = owner;
+        this.parent = parent;
+        this.statID = statID;
+        this.baseValue = baseValue;
+        this.value = baseValue;
+    }
+}
+
+class Player extends GameObject implements IPlayer {
+
+    owner: IPlayer;
+
+    stats: IStringMap<IStatCounter>;
+
+    tokens: IToken[];
+
     
-    value: number; 
+
+    affectedBy: IEffect[];
 }
 
 
-interface ICounter extends IGameObject {
+class BoardObject extends GameObject implements IGameObject {
 
-    
+    parentZone: IZone;
+
+    owner: IPlayer;
+
+    parent: IBoardObject;
+
+    attachedTo: ICard;
+
+    source: IEffect;
+
+
+
+    stats: IStringMap<IStatCounter> = {};
+
+    tokens: IToken[] = [];
+
+
+
+    effects: IEffect[] = [];
+
+    handlers: IStringMap<IGameEventHandler[]> = {};
 }
 
 
-interface IActivate_Ability extends IGameObject {
+class Zone extends BoardObject implements IZone {
 
-    getAction(): IAction;
+    list: IBoardObject[] = [];
 }
 
 
-interface IGameEventListener extends IGameObject {
+class Card extends BoardObject implements ICard {
 
-    //activator
-    event_type: string;
-
-    getAction(): IAction;
-
-    // czy wlasciwy handler dla tego eventu
-    triggerFor(event: core.IEvent): boolean;
-}
-
-
-interface IEffect extends IGameObject {
-
-    source : IBoardObject;
-
-    onAddEffect():void;
-
-    onRemoveEffect():void;
-
-    //desc():String;
-}
-
-interface IZone extends IBoardObject {
-    
-    list: IBoardObject[];
-}
-
-interface ICard extends IBoardObject {
+    cardID: string;
 
     activatedAbilities: IActivate_Ability[];
 }
+
+
+class Activate_Ability extends BoardObject implements IActivate_Ability {
+
+    abitilityType: string; // FAST, SORCERY, ...
+
+    costOfActivation(): Object { return null };
+
+    getAction(): IAction { return null };
+}
+
+
+class GameEventHandler extends BoardObject implements IBoardObject {
+
+    event_type: string;
+
+    getAction(): IAction { return null };
+
+    validateHandler(event: core.IEvent): boolean { return true };
+}
+
+
+class Effect extends BoardObject implements IBoardObject {
+
+    lifetime: EFFECT_LIFETIME;
+
+    onRegister(): void { };
+
+    onUnregister(): void { };
+}
+	
