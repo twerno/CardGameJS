@@ -32,8 +32,10 @@
     <TypeScriptCompile Include="src\core\EventManager.ts" />
     <TypeScriptCompile Include="src\core\GameEvents.ts" />
     <TypeScriptCompile Include="src\core\GameMgr.ts" />
+    <TypeScriptCompile Include="src\core\Helpers.ts" />
     <TypeScriptCompile Include="src\core\IDIsposable.ts" />
     <TypeScriptCompile Include="src\core\actions\Task.ts" />
+    <TypeScriptCompile Include="src\core\JSONHelper.ts" />
     <TypeScriptCompile Include="src\utils\collections\IList.ts" />
     <TypeScriptCompile Include="src\utils\collections\IMap.ts" />
     <TypeScriptCompile Include="src\utils\collections\List.ts" />
@@ -46,7 +48,15 @@
     <TypeScriptCompile Include="src\utils\WebRtc\WebRtcConsumer.ts" />
     <TypeScriptCompile Include="src\utils\WebRtc\WebRtcProducer.ts" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="web.config" />
+    <None Include="web.Debug.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+    <None Include="web.Release.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>

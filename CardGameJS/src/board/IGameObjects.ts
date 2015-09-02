@@ -1,5 +1,6 @@
 ///<reference path="../core/actions/Action.ts"/>
 ///<reference path="../core/EventManager.ts"/>
+///<reference path="../core/JSONHelper.ts"/>
 
 interface IStringMap<T> {
     [key: string]: T
@@ -15,8 +16,7 @@ interface IAttribute {
     parent: IGameObject;
 }
 
-interface IGameObject {
-    id: string;
+interface IGameObject extends IIdObject, IJSONSerializable {
     type: string;
     owner: IPlayer;
 
@@ -29,24 +29,20 @@ enum EFFECT_LIFETIME {
 
 
 interface IGameBoard {
-    version: number;
-
     zones: IStringGameObjectMap<IZone>;
 }
 
 
-interface IToken {
+interface IToken extends IGameObject {
 
-    owner: IPlayer;
     source: IEffect;
     attachedTo: IBoardObject;
     token_type: string;
 }
 
 
-interface IStatCounter {
+interface IStatCounter extends IGameObject {
 
-    owner: IPlayer;
     parent: IGameObject;
 
     statID: string;
@@ -127,8 +123,8 @@ interface IEffect extends IBoardObject {
 
     lifetime: EFFECT_LIFETIME;
 
-    onRegister(): void;
+    register(): void;
 
-    onUnregister(): void;
+    unregister(): void;
 }
 	
